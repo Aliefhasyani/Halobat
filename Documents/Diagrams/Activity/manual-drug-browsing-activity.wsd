@@ -1,0 +1,31 @@
+@startuml manual-drug-browsing-activity
+skinparam linetype spline
+title Manual Drug Browsing Activity Diagram
+
+|User|
+start
+:Access Drug Catalog;
+:Browse Drug Catalog Manually;
+:Use Search Filters;
+if (Found Desired Drug?) then (yes)
+  :View Drug Details;
+  :Check Price and Stock;
+  :Read Description;
+  
+  if (Want to Purchase?) then (yes)
+    :Select Quantity;
+    :Add to Cart;
+  endif
+else (no)
+  :Search with Different Keywords;
+  :Browse Categories;
+endif
+
+if (Cart Has Items?) then (yes)
+  :Proceed to Cart Management;
+else (no)
+  :Continue Browsing;
+endif
+
+stop
+@enduml
