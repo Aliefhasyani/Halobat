@@ -44,8 +44,14 @@ Table diagnoses {
   user_id int [ref: > users.id]
   symptoms text
   diagnosis text
-  recommended_drugs text [note: 'JSON or comma-separated drug IDs']
   created_at timestamp [default: `now()`]
+}
+
+Table recommended_drugs {
+  id int [pk, increment]
+  diagnoses_id int [ref: > diagnoses.id]
+  drug_id int [ref: > drugs.id]
+  quantity int
 }
 
 // Table for drugs
@@ -59,19 +65,6 @@ Table drugs {
   active boolean [default: true]
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
-}
-
-// Table for carts (junction for users and drugs)
-Table carts {
-  id int [pk, increment]
-  user_id int [ref: > users.id]
-  drug_id int [ref: > drugs.id]
-  quantity int [default: 1]
-  added_at timestamp [default: `now()`]
-
-  Indexes {
-    (user_id, drug_id) [unique]
-  }
 }
 
 // Table for orders
