@@ -1,0 +1,1 @@
+kalau nanti pake react terpisah, buat mi disini front end nya

@@ -1,0 +1,17 @@
+@startuml drug-management-usecase
+skinparam linetype spline
+left to right direction
+
+actor Admin
+actor LLM
+actor User
+
+package "Drug Management" {
+  (View Drug Data) <-- Admin
+  (Add Drug Data) <-- Admin
+  (Remove Drug Data) <-- Admin
+  (Edit Drug Data) <-- Admin
+  (View Drug Data) <-- LLM
+  User --> (View Drug Data)
+}
+@enduml
