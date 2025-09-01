@@ -1,0 +1,47 @@
+@startuml user-login-sequence
+title User Login Sequence Diagram
+
+actor User
+participant "Login\nForm" as Form
+participant "Authentication\nController" as AuthController
+participant "User\nModel" as UserModel
+participant "Role\nModel" as RoleModel
+participant "Session\nManager" as Session
+participant "Database" as DB
+
+User -> Form: Enter credentials (email/username, password)
+Form -> AuthController: login(credentials, password)
+
+AuthController -> AuthController: validateInput()
+AuthController -> UserModel: findUserByCredentials(credentials)
+UserModel -> DB: SELECT * FROM users WHERE email=? OR username=?
+DB --> UserModel: Return user data
+UserModel --> AuthController: User data
+
+alt User not found
+    AuthController --> Form: Invalid credentials error
+    Form --> User: Display error message
+else User found
+    AuthController -> AuthController: verifyPassword(password, hashedPassword)
+    
+    alt Password incorrect
+        AuthController --> Form: Invalid credentials error
+        Form --> User: Display error message
+    else Password correct
+        AuthController -> RoleModel: getUserRole(userId)
+        RoleModel -> DB: SELECT roles.* FROM roles JOIN users ON roles.id = users.role_id WHERE users.id=?
+        DB --> RoleModel: Role data
+        RoleModel --> AuthController: User role information
+        
+        AuthController -> Session: createSession(userId, roleId)
+        Session -> DB: INSERT INTO sessions (user_id, session_token, expires_at)
+        DB --> Session: Session created
+        Session --> AuthController: Session token
+        
+        AuthController --> Form: Login successful with session
+        Form -> Form: Set session cookie
+        Form --> User: Redirect to dashboard
+    end
+end
+
+@enduml

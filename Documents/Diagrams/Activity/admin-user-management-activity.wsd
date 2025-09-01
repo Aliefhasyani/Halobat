@@ -1,0 +1,63 @@
+@startuml admin-user-management-activity
+skinparam linetype spline
+title Admin User Management Activity Diagram
+
+|Admin|
+start
+:Access Admin Panel;
+:Manage Users;
+
+repeat
+  if (Action Type?) then (add)
+    :Create New User;
+    :Enter User Details;
+    :Assign Role;
+    :Set Permissions;
+    
+    |System|
+    :Validate User Data;
+    if (Valid Data?) then (yes)
+      :Create User Record;
+    else (no)
+      :Show Validation Errors;
+    endif
+    
+    |Admin|
+  elseif (edit) then
+    |Admin|
+    :Select User to Edit;
+    :Modify User Information;
+    :Update Role if Needed;
+    :Save Changes;
+    
+    |System|
+    :Update User Record;
+    :Log Changes;
+    
+    |Admin|
+  elseif (delete) then
+    |Admin|
+    :Select User to Delete;
+    :Confirm Deletion;
+    
+    |System|
+    :Check User Dependencies;
+    if (Has Orders/Data?) then (yes)
+      :Deactivate User;
+      :Preserve Historical Data;
+    else (no)
+      :Delete User Record;
+    endif
+    :Log Deletion;
+    
+    |Admin|  
+  else (view)
+    |Admin|  
+    :View User Details;
+    :Check User Activity;
+    :Review Order History;
+  endif
+repeat while (More User Actions?)
+
+stop
+@enduml

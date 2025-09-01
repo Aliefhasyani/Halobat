@@ -1,0 +1,44 @@
+@startuml cart-validation-checkout-sequence
+title Cart Validation and Checkout Initiation Sequence Diagram
+
+actor User
+participant "Checkout\nPage" as CheckoutUI
+participant "Order\nController" as OrderController
+participant "Cart\nModel" as CartModel
+participant "Drug\nModel" as DrugModel
+participant "Database" as DB
+
+User -> CheckoutUI: Proceed to checkout
+CheckoutUI -> OrderController: initiateCheckout(userId)
+
+OrderController -> CartModel: getCartItems(userId)
+CartModel -> DB: SELECT c.*, d.* FROM carts c JOIN drugs d ON c.drug_id = d.id WHERE c.user_id=?
+DB --> CartModel: Cart items with drug details
+CartModel --> OrderController: Cart data
+
+alt Cart is empty
+    OrderController --> CheckoutUI: Empty cart error
+    CheckoutUI --> User: Redirect to catalog
+else Cart has items
+    OrderController -> OrderController: calculateTotalAmount(cartItems)
+    
+    loop For each cart item
+        OrderController -> DrugModel: checkStock(drugId, quantity)
+        DrugModel -> DB: SELECT stock FROM drugs WHERE id=?
+        DB --> DrugModel: Current stock
+        DrugModel --> OrderController: Stock status
+    end
+    
+    alt Insufficient stock for any item
+        OrderController --> CheckoutUI: Stock unavailable error
+        CheckoutUI --> User: Show stock issues
+    else All items available
+        CheckoutUI --> User: Display order summary
+        
+        User -> CheckoutUI: Confirm order
+        CheckoutUI --> OrderController: Ready for order creation
+        note right: Flow continues to order-creation-sequence
+    end
+end
+
+@enduml

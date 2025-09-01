@@ -1,0 +1,176 @@
+@startuml activity-diagram
+skinparam linetype spline
+title Activity Diagram - Halobat Drug E-commerce System
+
+|Guest|
+start
+:Visit Website;
+if (Want to Register?) then (yes)
+  :Fill Registration Form;
+  :Submit Registration;
+  if (Valid Data?) then (yes)
+    :Create User Account;
+    :Send Confirmation;
+    :Login to System;
+  else (no)
+    :Show Validation Errors;
+    stop
+  endif
+else (no)
+  if (Want to Login?) then (yes)
+    :Enter Credentials;
+    if (Valid Credentials?) then (yes)
+      :Login Successful;
+    else (no)
+      :Show Login Error;
+      stop
+    endif
+  else (no)
+    :Browse as Guest;
+  endif
+endif
+
+|User|
+:View Drug Catalog;
+if (Want to Chat with LLM?) then (yes)
+  :Start Chat Session;
+  :Describe Symptoms;
+  :Receive Diagnosis;
+  :View Recommended Drugs;
+  if (Accept Recommendations?) then (yes)
+    :Add Recommended Drugs to Cart;
+  else (no)
+    :Continue Browsing;
+  endif
+else (no)
+  :Browse Drugs Manually;
+endif
+
+if (Found Desired Drug?) then (yes)
+  :Select Drug;
+  :View Drug Details;
+  :Specify Quantity;
+  :Add to Cart;
+  
+  repeat
+    :View Cart;
+    if (Want to Modify Cart?) then (yes)
+      if (Remove Item?) then (yes)
+        :Remove from Cart;
+      else (no)
+        :Update Quantity;
+      endif
+    else (no)
+      if (Ready to Checkout?) then (yes)
+        :Proceed to Checkout;
+        :Review Order Details;
+        :Confirm Order;
+        
+        |System|
+        :Generate Order ID;
+        :Calculate Total Amount;
+        :Create Order Record;
+        :Update Drug Stock;
+        
+        |User|
+        :Select Payment Method;
+        :Enter Payment Details;
+        :Submit Payment;
+        
+        |System|
+        :Process Payment;
+        if (Payment Successful?) then (yes)
+          :Update Payment Status;
+          :Send Order Confirmation;
+          :Update Order Status to Confirmed;
+        else (no)
+          :Payment Failed;
+          :Restore Drug Stock;
+          :Cancel Order;
+          stop
+        endif
+        
+        |Admin|
+        :Receive Order Notification;
+        :Process Order;
+        :Update Order Status to Shipped;
+        :Send Tracking Information;
+        
+        |System|
+        :Update Order Status to Delivered;
+        
+        |User|
+        :Receive Order;
+        if (Want to Cancel?) then (yes)
+          if (Order Cancelable?) then (yes)
+            :Cancel Order;
+            :Process Refund;
+            :Restore Stock;
+          else (no)
+            :Cannot Cancel;
+          endif
+        endif
+        
+      else (no)
+        :Continue Shopping;
+      endif
+    endif
+  repeat while (Continue Shopping?)
+else (no)
+  :Search for Other Drugs;
+endif
+
+|Admin|
+fork
+  :Manage Users;
+  if (Add User?) then (yes)
+    :Create User Account;
+  else (no)
+    if (Edit User?) then (yes)
+      :Update User Information;
+    else (no)
+      if (Delete User?) then (yes)
+        :Remove User Account;
+      else (no)
+        :View User Details;
+      endif
+    endif
+  endif
+fork again
+  :Manage Drugs;
+  if (Add Drug?) then (yes)
+    :Enter Drug Information;
+    :Set Stock Level;
+    :Save Drug Data;
+  else (no)
+    if (Edit Drug?) then (yes)
+      :Update Drug Information;
+      :Modify Stock Level;
+    else (no)
+      if (Remove Drug?) then (yes)
+        :Delete Drug Record;
+      else (no)
+        :View Drug Data;
+      endif
+    endif
+  endif
+fork again
+  :Manage Orders;
+  :View All Orders;
+  if (Process Order?) then (yes)
+    :Update Order Status;
+    :Notify Customer;
+  endif
+end fork
+
+|LLM|
+:Receive User Symptoms;
+:Analyze Symptoms;
+:Generate Diagnosis;
+:Recommend Appropriate Drugs;
+:Create Diagnosis Record;
+:Link Recommended Drugs;
+:Send Response to User;
+
+stop
+@enduml

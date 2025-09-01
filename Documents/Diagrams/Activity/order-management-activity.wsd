@@ -1,0 +1,82 @@
+@startuml order-management-activity
+skinparam linetype spline
+title Order Management and Fulfillment Activity Diagram
+
+|Admin|
+start
+:Access Admin Dashboard;
+:View Orders List;
+
+repeat
+  :Select Order to Process;
+  :View Order Details;
+  :Check Order Status;
+  
+  if (Order Status?) then (confirmed)
+    :Prepare Order;
+    :Verify Stock;
+    :Package Items;
+    :Update Status to Shipped;
+    :Generate Tracking Number;
+    
+    |System|
+    :Update Order Record;
+    :Log Status Change;
+    
+  elseif (shipped) then
+    :Track Delivery;
+    :Confirm Delivery;
+    :Update Status to Delivered;
+    
+    |System|
+    :Update Order Record;
+  elseif (pending) then
+    :Review Payment Status;
+    if (Payment Completed?) then (yes)
+      :Confirm Order;
+      :Update Status to Confirmed;
+    else (no)
+      :Check Payment Issues;
+      :Contact Customer if Needed;
+    endif
+  endif
+  
+repeat while (More Orders to Process?)
+
+|User|
+:View My Orders;
+:Select Order;
+:Check Order Status;
+
+if (Order Status?) then (pending)
+  if (Want to Cancel?) then (yes)
+    :Request Cancellation;
+    
+    |System|
+    :Check Cancellation Policy;
+    if (Cancellation Allowed?) then (yes)
+      :Cancel Order;
+      :Process Refund;
+      :Restore Stock;
+      :Update Status to Cancelled;
+    else (no)
+      :Show Cannot Cancel Message;
+    endif
+  endif
+  
+elseif (confirmed) then
+  :Track Order Progress;
+  :View Estimated Delivery;
+  
+elseif (shipped) then
+  :Track Package;
+  :View Tracking Details;
+  
+elseif (delivered) then
+  :Confirm Receipt;
+  :Rate Order Experience;
+  
+endif
+
+stop
+@enduml

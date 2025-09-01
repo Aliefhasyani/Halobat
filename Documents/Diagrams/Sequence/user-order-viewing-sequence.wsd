@@ -1,0 +1,53 @@
+@startuml user-order-viewing-sequence
+title User Order Viewing Sequence Diagram
+
+actor User
+participant "Order\nInterface" as OrderUI
+participant "Order\nController" as OrderController
+participant "Order\nModel" as OrderModel
+participant "OrderItem\nModel" as OrderItemModel
+participant "Payment\nModel" as PaymentModel
+participant "Database" as DB
+
+== User Views Orders ==
+User -> OrderUI: Access order history
+OrderUI -> OrderController: getUserOrders(userId)
+
+OrderController -> OrderModel: getOrdersByUser(userId)
+OrderModel -> DB: SELECT * FROM orders WHERE user_id=? ORDER BY created_at DESC
+DB --> OrderModel: User orders
+OrderModel --> OrderController: Orders list
+
+loop For each order
+    OrderController -> OrderItemModel: getOrderItems(orderId)
+    OrderItemModel -> DB: SELECT oi.*, d.name FROM order_items oi JOIN drugs d ON oi.drug_id = d.id WHERE oi.order_id=?
+    DB --> OrderItemModel: Order items with drug names
+    OrderItemModel --> OrderController: Order items data
+end
+
+OrderController --> OrderUI: Orders with items
+OrderUI --> User: Display order history
+
+== User Views Order Details ==
+User -> OrderUI: Click on specific order
+OrderUI -> OrderController: getOrderDetails(orderId, userId)
+
+OrderController -> OrderModel: getOrderWithDetails(orderId, userId)
+OrderModel -> DB: SELECT * FROM orders WHERE id=? AND user_id=?
+DB --> OrderModel: Order details
+OrderModel --> OrderController: Order data
+
+OrderController -> OrderItemModel: getOrderItems(orderId)
+OrderItemModel -> DB: SELECT oi.*, d.name, d.description FROM order_items oi JOIN drugs d ON oi.drug_id = d.id WHERE oi.order_id=?
+DB --> OrderItemModel: Detailed order items
+OrderItemModel --> OrderController: Items data
+
+OrderController -> PaymentModel: getOrderPayment(orderId)
+PaymentModel -> DB: SELECT * FROM payments WHERE order_id=?
+DB --> PaymentModel: Payment details
+PaymentModel --> OrderController: Payment data
+
+OrderController --> OrderUI: Complete order information
+OrderUI --> User: Display detailed order view
+
+@enduml
