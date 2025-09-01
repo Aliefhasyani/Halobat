@@ -8,9 +8,9 @@ actor Guest
 
 package "User Management" {
   (View Users) <-- Admin
-  (View User Details) <-- Admin
   (Add User) <-- Admin
   (Edit User) <-- Admin
+  (View User Details) <-- Admin
   (Delete User) <-- Admin
   User --> (View User Details)
   User --> (Edit User)
