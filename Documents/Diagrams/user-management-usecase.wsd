@@ -1,0 +1,23 @@
+@startuml user-management-usecase
+skinparam linetype spline
+left to right direction
+
+actor Admin
+actor User
+actor Guest
+
+package "User Management" {
+  (View Users) <-- Admin
+  (View User Details) <-- Admin
+  (Add User) <-- Admin
+  (Edit User) <-- Admin
+  (Delete User) <-- Admin
+  User --> (View User Details)
+  User --> (Edit User)
+  User --> (Login)
+  Guest --> (Register)
+  (View User Details) .> (Login) : <<include>>
+  (Edit User) .> (Login) : <<include>>
+  (Register) .> (Add User) : <<include>>
+}
+@enduml

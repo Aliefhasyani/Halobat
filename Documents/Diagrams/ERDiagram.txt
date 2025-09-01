@@ -1,0 +1,105 @@
+//// Docs: https://dbml.dbdiagram.io/docs
+//// -- ER Diagram for Drug/Medicine Ecommerce Web App
+//// -- Tables: users, roles, diagnoses, drugs, carts, orders, payments
+
+// Enum for order status
+Enum order_status {
+  pending
+  confirmed
+  shipped
+  delivered
+  cancelled
+}
+
+// Enum for payment status
+Enum payment_status {
+  pending
+  completed
+  failed
+  refunded
+}
+
+// Table for roles
+Table roles {
+  id int [pk, increment]
+  name varchar [unique]
+  description text
+}
+
+// Table for users
+Table users {
+  id int [pk, increment]
+  username varchar [unique]
+  email varchar [unique]
+  password varchar
+  role_id int [ref: > roles.id]
+  full_name varchar
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// Table for diagnoses
+Table diagnoses {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  symptoms text
+  diagnosis text
+  recommended_drugs text [note: 'JSON or comma-separated drug IDs']
+  created_at timestamp [default: `now()`]
+}
+
+// Table for drugs
+Table drugs {
+  id int [pk, increment]
+  name varchar
+  description text
+  price decimal(10,2)
+  stock int [default: 0]
+  category varchar
+  active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// Table for carts (junction for users and drugs)
+Table carts {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  drug_id int [ref: > drugs.id]
+  quantity int [default: 1]
+  added_at timestamp [default: `now()`]
+
+  Indexes {
+    (user_id, drug_id) [unique]
+  }
+}
+
+// Table for orders
+Table orders {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  total_amount decimal(10,2)
+  status order_status [default: 'pending']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// Table for order items (to link orders to drugs, since carts are temporary)
+Table order_items {
+  id int [pk, increment]
+  order_id int [ref: > orders.id]
+  drug_id int [ref: > drugs.id]
+  quantity int
+  price decimal(10,2) [note: 'Price at time of order']
+}
+
+// Table for payments
+Table payments {
+  id int [pk, increment]
+  order_id int [ref: > orders.id, unique]
+  amount decimal(10,2)
+  method varchar [note: 'e.g., credit_card, paypal']
+  status payment_status [default: 'pending']
+  transaction_id varchar
+  created_at timestamp [default: `now()`]
+}

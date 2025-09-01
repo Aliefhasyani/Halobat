@@ -1,0 +1,23 @@
+@startuml order-management-usecase
+skinparam linetype spline
+left to right direction
+
+actor User
+actor Admin
+actor LLM
+
+package "Order Management" {
+  User --> (View Cart)
+  User --> (Add to Cart)
+  User --> (Remove from Cart)
+  User --> (Place Order)
+  User --> (View Orders)
+  Admin --> (View Orders)
+  User --> (Cancel Order)
+  (Process Order) <-- Admin
+  User --> (View Diagnoses)
+  (View Diagnoses) <-- Admin
+  (Add Diagnoses) <-- LLM
+  (Add Diagnoses) .> (View Diagnoses) : <<include>>
+}
+@enduml
