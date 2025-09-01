@@ -16,8 +16,8 @@ package "User Management" {
   User --> (Edit User)
   User --> (Login)
   Guest --> (Register)
-  (View User Details) .> (Login) : <<include>>
   (Edit User) .> (Login) : <<include>>
+  (Login) <. (View User Details) : <<include>>
   (Register) .> (Add User) : <<include>>
 }
 @enduml

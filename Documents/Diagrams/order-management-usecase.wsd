@@ -9,13 +9,25 @@ actor LLM
 package "Order Management" {
   User --> (Add to Cart)
   User --> (Remove from Cart)
+  User --> (View Cart)
   User --> (Place Order)
+  User --> (View Orders)
   User --> (Cancel Order)
-  (Process Order) <-- Admin
-  (Add Diagnoses) <-- LLM
-  (Process Order) .> (View Orders) : <<include>>
+  User --> (Chat With LLM)
   User --> (View Diagnoses)
-  (Add Diagnoses) .> (View Diagnoses) : <<include>>
-  (Add to Cart) .> (View Orders) : <<include>>
+  
+  (Process Order) <-- Admin 
+  (View Orders) <-- Admin 
+  
+  (Chat With LLM) --> LLM  
+  (Add Diagnoses) <-- LLM
+  
+  ' Include relationships
+  (View Cart) <. (Add to Cart) : <<include>>
+  (Remove from Cart) .> (View Cart) : <<include>>
+  (Process Order) .> (View Orders) : <<include>>
+  
+  ' Extends relationships
+  (Cancel Order) .> (Place Order) : <<extends>>
 }
 @enduml
