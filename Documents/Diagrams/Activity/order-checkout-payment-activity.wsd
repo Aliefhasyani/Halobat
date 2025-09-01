@@ -62,10 +62,8 @@ if (Cart Not Empty?) then (yes)
       :Update Order Status to Confirmed;
       :Reduce Drug Stock;
       :Clear User Cart;
-      :Send Order Confirmation Email;
       
       |User|
-      :Receive Order Confirmation;
       :View Order Details;
       :Track Order Status;
     else (no)

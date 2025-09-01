@@ -33,7 +33,6 @@ repeat
     |System|
     :Update User Record;
     :Log Changes;
-    :Notify User of Changes;
     
     |Admin|
   elseif (delete) then
