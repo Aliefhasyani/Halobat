@@ -1,0 +1,53 @@
+@startuml Drug Management Sequence
+actor "Admin/SuperAdmin"
+participant System
+participant Database
+
+== View Drugs ==
+"Admin/SuperAdmin" -> System: Request to view drugs
+System -> Database: Query drugs table (join with manufacturers, dosage_forms, active_ingredients)
+Database --> System: Return list of drugs with details
+System --> "Admin/SuperAdmin": Display drugs list
+
+== Add Drug ==
+"Admin/SuperAdmin" -> System: Provide new drug data (generic_name, description, price, manufacturer, dosage_form, active_ingredients)
+System -> Database: Check user role
+Database --> System: Return role name
+alt role == "admin" or role == "superadmin"
+  System -> Database: Insert into drugs table
+  System -> Database: Insert into drug_active_ingredients table
+  System -> Database: Insert into brands table if applicable
+  Database --> System: Confirm insertions
+  System --> "Admin/SuperAdmin": Drug added successfully
+else
+  System --> "Admin/SuperAdmin": Authorization failed
+end
+
+== Edit Drug ==
+"Admin/SuperAdmin" -> System: Select drug and provide updated data
+System -> Database: Check user role
+Database --> System: Return role name
+alt role == "admin" or role == "superadmin"
+  System -> Database: Update drug in drugs table
+  System -> Database: Update related tables (drug_active_ingredients, brands)
+  Database --> System: Confirm updates
+  System --> "Admin/SuperAdmin": Drug updated successfully
+else
+  System --> "Admin/SuperAdmin": Authorization failed
+end
+
+== Delete Drug ==
+"Admin/SuperAdmin" -> System: Select drug to delete
+System -> Database: Check user role
+Database --> System: Return role name
+alt role == "admin" or role == "superadmin"
+  System -> Database: Delete from drug_active_ingredients
+  System -> Database: Delete from brands
+  System -> Database: Delete drug from drugs table
+  Database --> System: Confirm deletions
+  System --> "Admin/SuperAdmin": Drug deleted successfully
+else
+  System --> "Admin/SuperAdmin": Authorization failed
+end
+
+@enduml

@@ -2,27 +2,10 @@
 //// -- ER Diagram for Drug/Medicine Ecommerce Web App
 //// -- Tables: users, roles, diagnoses, drugs, carts, orders, payments
 
-// Enum for order status
-Enum order_status {
-  pending
-  confirmed
-  shipped
-  delivered
-  cancelled
-}
-
-// Enum for payment status
-Enum payment_status {
-  pending
-  completed
-  failed
-  refunded
-}
-
 // Table for roles
 Table roles {
-  id int [pk, increment]
-  name varchar [unique]
+  id uuid [pk]
+  name varchar(255) [unique]
   description text
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
@@ -30,20 +13,20 @@ Table roles {
 
 // Table for users
 Table users {
-  id int [pk, increment]
-  username varchar [unique]
-  email varchar [unique]
-  password varchar
-  role_id int [ref: > roles.id]
-  full_name varchar
+  id uuid [pk]
+  username varchar(255) [unique]
+  email varchar(255) [unique]
+  password varchar(255)
+  role_id uuid [ref: > roles.id]
+  full_name varchar(255)
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }
 
 // Table for diagnoses
 Table diagnoses {
-  id int [pk, increment]
-  user_id int [ref: > users.id]
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
   symptoms text
   diagnosis text
   created_at timestamp [default: `now()`]
@@ -51,9 +34,9 @@ Table diagnoses {
 }
 
 Table recommended_drugs {
-  id int [pk, increment]
-  diagnoses_id int [ref: > diagnoses.id]
-  drug_id int [ref: > drugs.id]
+  id uuid [pk]
+  diagnoses_id uuid [ref: > diagnoses.id]
+  drug_id uuid [ref: > drugs.id]
   quantity int
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
@@ -61,44 +44,57 @@ Table recommended_drugs {
 
 // Table for drugs
 Table drugs {
-  id int [pk, increment]
-  name varchar
+  id uuid [pk]
+  generic_name varchar(255)
   description text
+  picture text
   price decimal(10,2)
-  stock int [default: 0]
+  manufacturer_id uuid [ref: > manufacturers.id]
+  dosage_form_id uuid [ref: > dosage_forms.id]
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }
 
-// Table for orders
-Table orders {
-  id int [pk, increment]
-  user_id int [ref: > users.id]
-  total_amount decimal(10,2)
-  status order_status [default: 'pending']
+// Table for dosage forms
+Table dosage_forms {
+  id uuid [pk]
+  name varchar(255) [unique]
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }
 
-// Table for order items (to link orders to drugs, since carts are temporary)
-Table order_items {
-  id int [pk, increment]
-  order_id int [ref: > orders.id]
-  drug_id int [ref: > drugs.id]
+// Table for manufacturers
+Table manufacturers {
+  id uuid [pk]
+  name varchar(255) [unique]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// Table for active ingredients
+Table active_ingredients {
+  id uuid [pk]
+  name varchar(255) [unique]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// Table for brands
+Table brands {
+  id uuid [pk]
+  name varchar(255)
+  picture text
+  drug_id uuid [ref: > drugs.id]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// Table for drug active ingredients
+Table drug_active_ingredients {
+  id uuid [pk]
+  drug_id uuid [ref: > drugs.id]
+  active_ingredient_id uuid [ref: > active_ingredients.id]
   quantity int
-  price decimal(10,2) [note: 'Price at time of order']
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
-}
-
-// Table for payments
-Table payments {
-  id int [pk, increment]
-  order_id int [ref: > orders.id, unique]
-  amount decimal(10,2)
-  method varchar [note: 'e.g., credit_card, paypal']
-  status payment_status [default: 'pending']
-  transaction_id varchar
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }

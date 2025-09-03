@@ -1,0 +1,20 @@
+@startuml AI Recommendation Use Case
+left to right direction
+
+actor "AI Assistant" as AI
+
+rectangle "AI Diagnosis" {
+    usecase "Add Diagnosis" as UC7
+    usecase "Recommend Drugs" as UC8
+    usecase "View Drugs" as UC9
+    usecase "View Active Ingredients" as UC10
+    usecase "View Dosage Forms" as UC11
+}
+
+AI --> UC8
+
+UC8 --> UC7 : <<include>>
+UC8 --> UC9 : <<include>>
+UC8 --> UC10 : <<include>>
+UC8 --> UC11 : <<include>>
+@enduml

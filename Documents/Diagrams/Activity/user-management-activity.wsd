@@ -1,0 +1,80 @@
+@startuml User Management Activity
+|Admin/SuperAdmin|
+start
+:Logs in;
+if (View Users?) then (no)
+    |Admin/SuperAdmin|
+else (yes)
+    |System|
+    if (Authorized?) then (yes)
+    :Display Users;
+    |Admin/SuperAdmin|
+    :View Users;
+        if (Add User?) then (no)
+        |Admin/SuperAdmin|
+        else (yes)
+            :Input User Data to add;
+            |System|
+            if (Authorized?) then (yes)
+            :Add User;
+            |Admin/SuperAdmin|
+            :View added user;
+            |System|
+            else (no)
+            :Show Error;
+            endif
+        endif
+        |Admin/SuperAdmin|
+        if (Edit User?) then (no)
+        else (yes)
+            :Select User to edit;
+            :Input Data to edit;
+            |System|
+            if (Authorized?) then (yes)
+            :Update User;
+            |Admin/SuperAdmin|
+            :View edited user;
+            |System|
+            else (no)
+            :Show Error;
+            endif
+        endif
+        |Admin/SuperAdmin|
+        if (Delete User?) then (no)
+        else (yes)
+            :Choose User to delete;
+            :Confirm deletion;
+            |System|
+            if (Authorized?) then (yes)
+            :Delete User;
+            |Admin/SuperAdmin|
+            :View users;
+            |System|
+            else (no)
+            :Show Error;
+            endif
+        endif
+        |Admin/SuperAdmin|
+        if (Change User Role?) then (no)
+        else (yes)
+            :Select User;
+            :Choose new Role;
+            |System|
+            if (Authorized?) then (yes)
+            :Update User Role;
+            |Admin/SuperAdmin|
+            :View updated user;
+            |System|
+            else (no)
+            :Show Error;
+            endif
+        endif
+    |System|
+    else (no)
+    :Show Error;
+    endif
+endif
+|Admin/SuperAdmin|
+:Log out;
+stop
+@enduml

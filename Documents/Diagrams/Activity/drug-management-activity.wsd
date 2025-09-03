@@ -1,0 +1,64 @@
+@startuml Drug Management Activity
+|Admin/SuperAdmin|
+start
+:Logs in;
+if (View?) then (no)
+    |Admin/SuperAdmin|
+else (yes)
+    |System|
+    if (Authorized?) then (yes)
+    :Display Data;
+    |Admin/SuperAdmin|
+    :View Data;
+        if (add?) then (no)
+        |Admin/SuperAdmin|
+        else (yes)
+            :Input Data to add;
+            |System|
+            if (Authorized?) then (yes)
+            :Add Data;
+            |Admin/SuperAdmin|
+            :View added data;
+            |System|
+            else (no)
+            :Show Error;
+            endif
+        endif
+        |Admin/SuperAdmin|
+        if (edit?) then (no)
+        else (yes)
+            :Input Data to edit;
+            |System|
+            if (Authorized?) then (yes)
+            :Update Data;
+            |Admin/SuperAdmin|
+            :View edited data;
+            |System|
+            else (no)
+            :Show Error;
+            endif
+        endif
+        |Admin/SuperAdmin|
+        if (delete?) then (no)
+        else (yes)
+            :Choose Data to delete;
+            :Confirm deletion;
+            |System|
+            if (Authorized?) then (yes)
+            :Delete Data;
+            |Admin/SuperAdmin|
+            :View data;
+            |System|
+            else (no)
+            :Show Error;
+            endif
+        endif
+    |System|
+    else (no)
+    :Show Error;
+    endif
+endif
+|Admin/SuperAdmin|
+:Log out;
+stop
+@enduml

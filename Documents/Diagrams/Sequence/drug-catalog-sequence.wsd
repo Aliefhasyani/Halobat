@@ -1,0 +1,27 @@
+@startuml Drug Catalog Sequence
+actor User
+participant System
+participant Database
+participant AI
+
+== View Drug Details ==
+User -> System: Select drug to view details
+System -> Database: Query drugs table for drug info (generic_name, description, picture, price)
+Database --> System: Return drug details
+System -> Database: Query manufacturers and dosage_forms for additional info
+Database --> System: Return manufacturer and dosage form data
+System --> User: Display drug details
+
+== Search Drugs ==
+User -> System: Enter search query (e.g., drug name)
+System -> Database: Query drugs table with search criteria (LIKE on generic_name or description)
+Database --> System: Return matching drugs
+System --> User: Display search results
+
+== Filter Drugs ==
+User -> System: Apply filters (e.g., manufacturer, dosage form)
+System -> Database: Query drugs table with filters (join manufacturers, dosage_forms)
+Database --> System: Return filtered drugs
+System --> User: Display filtered results
+
+@enduml

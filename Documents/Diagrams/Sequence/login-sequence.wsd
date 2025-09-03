@@ -1,0 +1,17 @@
+@startuml Login Sequence
+actor User
+participant System
+participant Database
+
+User -> System: Enter email/username and password
+System -> Database: Query users table for credentials
+Database --> System: Return user data if valid, else null
+alt Credentials valid
+    System -> Database: Query roles table for user role
+    Database --> System: Return role
+    System -> System: Start session
+    System --> User: Redirect to dashboard
+else Credentials invalid
+    System --> User: Display invalid credentials message
+end
+@enduml

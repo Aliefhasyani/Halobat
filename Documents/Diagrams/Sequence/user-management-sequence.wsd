@@ -1,0 +1,66 @@
+@startuml User Management Sequence
+actor "Admin/SuperAdmin"
+participant System
+participant Database
+
+== View Users ==
+"Admin/SuperAdmin" -> System: Request to view users
+System -> Database: Check user role (query roles.name via users.role_id)
+Database --> System: Return role name
+alt role == "admin" or role == "superadmin"
+  System -> Database: Query users table (join with roles)
+  Database --> System: Return list of users with roles
+  System --> "Admin/SuperAdmin": Display users list
+else
+  System --> "Admin/SuperAdmin": Authorization failed
+end
+
+== Add User ==
+"Admin/SuperAdmin" -> System: Provide new user data
+System -> Database: Check user role (query roles.name via users.role_id)
+Database --> System: Return role name
+alt role == "admin" or role == "superadmin"
+  System -> Database: Insert new user into users table
+  Database --> System: Confirm insertion
+  System --> "Admin/SuperAdmin": User added successfully
+else
+  System --> "Admin/SuperAdmin": Authorization failed
+end
+
+== Edit User ==
+"Admin/SuperAdmin" -> System: Select user and provide updated data
+System -> Database: Check user role (query roles.name via users.role_id)
+Database --> System: Return role name
+alt role == "admin" or role == "superadmin"
+  System -> Database: Update user in users table
+  Database --> System: Confirm update
+  System --> "Admin/SuperAdmin": User updated successfully
+else
+  System --> "Admin/SuperAdmin": Authorization failed
+end
+
+== Delete User ==
+"Admin/SuperAdmin" -> System: Select user to delete
+System -> Database: Check user role (query roles.name via users.role_id)
+Database --> System: Return role name
+alt role == "admin" or role == "superadmin"
+  System -> Database: Delete user from users table
+  Database --> System: Confirm deletion
+  System --> "Admin/SuperAdmin": User deleted successfully
+else
+  System --> "Admin/SuperAdmin": Authorization failed
+end
+
+== Change User Role ==
+"Admin/SuperAdmin" -> System: Select user and new role
+System -> Database: Check user role (query roles.name via users.role_id)
+Database --> System: Return role name
+alt role == "superadmin"
+  System -> Database: Update role_id in users table
+  Database --> System: Confirm update
+  System --> "Admin/SuperAdmin": Role changed successfully
+else
+  System --> "Admin/SuperAdmin": Authorization failed
+end
+
+@enduml

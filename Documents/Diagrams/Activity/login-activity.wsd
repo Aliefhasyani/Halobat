@@ -1,0 +1,13 @@
+@startuml Login Activity
+start
+repeat
+  :Guest enters login credentials;
+  :Enter email/username and password;
+  :System checks against users table;
+  backward: Display invalid credentials message;
+repeat while (Credentials valid?) is (no) not (yes)
+    :Retrieve user role;
+    :Start session;
+    :Redirect to dashboard;
+stop
+@enduml
