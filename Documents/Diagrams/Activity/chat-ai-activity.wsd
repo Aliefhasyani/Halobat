@@ -1,0 +1,17 @@
+@startuml Chat AI Activity
+|User|
+start
+:Initiates chat with AI;
+:Describes symptoms;
+|LLM|
+:Adds diagnosis;
+:Recommends drugs;
+|System|
+:Display recommended drugs;
+|User|
+:View recommended drugs;
+:View drug details;
+:View active ingredients;
+:View dosage forms;
+stop
+@enduml

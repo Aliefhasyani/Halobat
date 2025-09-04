@@ -1,0 +1,30 @@
+@startuml Drug Catalog Activity
+|User|
+start
+:User logs in;
+:User browses drug catalog;
+if (Search drugs?) then (yes)
+:Enter search query;
+|System|
+:Search drugs based on query;
+:Display search results;
+|User|
+:View search results;
+else (no)
+endif
+if (Filter drugs?) then (yes)
+:Select filters;
+|System|
+:Filter drugs based on query;
+:Display filter results;
+|User|
+:View filter results;
+else (no)
+endif
+if (Chat with AI?) then (yes)
+:Initiates chat with AI;
+else (no)
+:Select drug to view details;
+endif
+stop
+@enduml

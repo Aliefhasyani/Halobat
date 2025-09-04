@@ -1,0 +1,15 @@
+@startuml Register Sequence
+actor User
+participant System
+participant Database
+
+User -> System: Enter username, email, password, full_name
+System -> System: Validate input
+alt Input valid
+    System -> Database: Insert into users table with default role_id
+    Database --> System: Confirm insertion
+    System --> User: Registration successful
+else Input invalid
+    System --> User: Display error message
+end
+@enduml

@@ -1,0 +1,30 @@
+@startuml Chat AI Sequence
+actor User
+participant System
+participant LLM
+participant Database
+
+User -> System: Initiate chat with AI
+User -> System: Describe symptoms
+System -> LLM: Send symptoms for analysis
+LLM --> System: Return diagnosis
+LLM --> System: Return drug recommendations
+System -> Database: Insert diagnosis into diagnoses table
+Database --> System: Confirm diagnosis insertion
+loop for each recommended drug
+    System -> Database: Query drugs table to check if recommended drug exists
+    alt drug exists
+        Database --> System: Return drug details
+        System -> Database: Insert available drug into recommended_drugs table
+        Database --> System: Confirm insertion
+    else drug not found
+        Database --> System: Drug not found
+    end
+end
+System --> User: Display available recommended drugs from recommended_drugs table
+
+User -> System: View recommended drugs
+System -> Database: Query recommended_drugs and join with drugs
+Database --> System: Return recommended drug list
+System --> User: Display recommended drug list
+@enduml

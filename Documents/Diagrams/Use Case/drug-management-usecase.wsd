@@ -1,17 +1,65 @@
-@startuml drug-management-usecase
-skinparam linetype spline
+@startuml Drug Management Use Case
 left to right direction
 
 actor Admin
-actor LLM
-actor User
+actor Superadmin
 
-package "Drug Management" {
-  (View Drug Data) <-- Admin
-  (Add Drug Data) <-- Admin
-  (Remove Drug Data) <-- Admin
-  (Edit Drug Data) <-- Admin
-  (View Drug Data) <-- LLM
-  User --> (View Drug Data)
+Superadmin <|-- Admin
+
+rectangle "Drug Management" {
+    usecase "View Drugs" as UC1
+    usecase "Add Drug" as UC2
+    usecase "Edit Drug" as UC3
+    usecase "Delete Drug" as UC4
 }
+
+rectangle "Brand Management" {
+    usecase "View Brands" as UC17
+    usecase "Add Brand" as UC18
+    usecase "Edit Brand" as UC19
+    usecase "Delete Brand" as UC20
+}
+
+rectangle "Manufacturer Management" {
+    usecase "View Manufacturers" as UC5
+    usecase "Add Manufacturer" as UC6
+    usecase "Edit Manufacturer" as UC7
+    usecase "Delete Manufacturer" as UC8
+}
+
+rectangle "Dosage Form Management" {
+    usecase "View Dosage Forms" as UC9
+    usecase "Add Dosage Form" as UC10
+    usecase "Edit Dosage Form" as UC11
+    usecase "Delete Dosage Form" as UC12
+}
+
+rectangle "Active Ingredient Management" {
+    usecase "View Active Ingredients" as UC13
+    usecase "Add Active Ingredient" as UC14
+    usecase "Edit Active Ingredient" as UC15
+    usecase "Delete Active Ingredient" as UC16
+}
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC17
+Admin --> UC18
+Admin --> UC19
+Admin --> UC20
+
+UC5 <-- Superadmin 
+UC6 <-- Superadmin
+UC7 <-- Superadmin
+UC8 <-- Superadmin
+UC9 <-- Superadmin
+UC10 <-- Superadmin
+UC11 <-- Superadmin
+UC12 <-- Superadmin
+UC13 <-- Superadmin
+UC14 <-- Superadmin
+UC15 <-- Superadmin
+UC16 <-- Superadmin
 @enduml

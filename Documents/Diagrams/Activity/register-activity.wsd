@@ -1,0 +1,13 @@
+@startuml Register Activity
+start
+repeat
+  :Guest enters registration details;
+  :Enter username, email, password, full_name;
+  :System validates input;
+  backward: Display error message;
+repeat while (Valid?) is (no) not (yes)
+    :Create user record in users table;
+    :Assign role_id;
+    :Registration successful;
+stop
+@enduml
