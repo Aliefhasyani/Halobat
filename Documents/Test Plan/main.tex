@@ -1,0 +1,169 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{longtable}
+\usepackage{datetime}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\usepackage{tabularx}
+
+% Margin setup
+\geometry{top=3cm,bottom=3cm,left=3cm,right=3cm}
+
+% Header setup
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Test Plan - Halobat}
+\fancyhead[R]{\today}
+
+% Kolom fleksibel
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X} % untuk kolom auto wrap
+
+\title{Rencana Pengujian Aplikasi Halobat}
+\author{Kelompok 4 - Universitas Hasanuddin}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Test Plan Identifier}
+Nama: Halobat Web Testing TP\_1.0
+
+\section{References}
+\begin{itemize}
+    \item Proposal Proyek Perangkat Lunak: Website Katalog Obat-Obatan dengan Diagnosa dan Rekomendasi (Kelompok 4, Universitas Hasanuddin, 2025).
+    \item ER Diagram Halobat dibuat menggunakan \textbf{DBML (Database Markup Language)} pada layanan \url{https://dbml.dbdiagram.io/docs}. 
+    \item Definisi tabel ERD Halobat mencakup: \textit{users, roles, diagnoses, recommended\_drugs, drugs, dosage\_forms, manufacturers, active\_ingredients, brands, drug\_active\_ingredients}.
+    \item Standar IEEE 829 - Test Plan Documentation.
+\end{itemize}
+
+
+\section{Introduction}
+Pengujian ini bertujuan untuk memberikan kerangka kerja dalam memastikan kualitas aplikasi \textbf{Halobat}, yaitu website katalog obat-obatan dengan fitur diagnosa dan rekomendasi. 
+Tujuan pengujian adalah:
+\begin{itemize}
+    \item Menjamin keakuratan informasi obat.
+    \item Memastikan fitur diagnosa dan rekomendasi bekerja sesuai skenario.
+    \item Memvalidasi autentikasi dan otorisasi pengguna (Admin, User).
+    \item Menjamin UI/UX dapat digunakan dengan mudah oleh pengguna umum.
+\end{itemize}
+
+\section{Test Items}
+\begin{itemize}
+    \item Modul autentikasi (login, register, logout).
+    \item Modul admin panel (CRUD data obat, pengguna, produsen).
+    \item Modul katalog obat (pencarian, filter, detail obat).
+    \item Modul diagnosa (input gejala, hasil diagnosa, rekomendasi obat).
+\end{itemize}
+
+\section{Features To Be Tested}
+\begin{itemize}
+    \item Validasi input (registrasi, login, diagnosa).
+    \item Fungsi CRUD pada data obat, pengguna.
+    \item Rekomendasi obat berdasarkan hasil diagnosa.
+    \item Middleware autentikasi dan otorisasi.
+    \item API response (status code, format JSON).
+    \item Responsifitas tampilan (UI).
+\end{itemize}
+
+\section{Features Not To Be Tested}
+\begin{itemize}
+    \item Integrasi pihak ketiga di luar cakupan awal.
+    \item Multi-bahasa.
+    \item Export/print laporan.
+\end{itemize}
+
+\section{Approach}
+Pengujian dilakukan dengan kombinasi:
+\begin{itemize}
+    \item \textbf{Unit Test}: Menggunakan PHPUnit/Pest Laravel.
+    \item \textbf{Feature Test}: Menguji alur end-to-end (auth, katalog, diagnosa).
+    \item \textbf{Integration Test}: Koneksi database.
+    \item \textbf{Manual/Exploratory}: UI/UX dan validasi input.
+    \item \textbf{Security Testing}: SQL Injection, XSS, CSRF, role-based access.
+\end{itemize}
+
+\section{Pass/Fail Criteria}
+\begin{itemize}
+    \item Semua test case prioritas tinggi lulus.
+    \item Tidak ada bug kritis yang menghalangi fungsi utama.
+    \item Target minimal 80\% unit test coverage.
+\end{itemize}
+
+\section{Suspension Criteria}
+Pengujian dihentikan sementara apabila:
+\begin{itemize}
+    \item Sistem tidak dapat diakses (server crash).
+    \item Modul autentikasi gagal berfungsi.
+    \item Integritas database rusak.
+\end{itemize}
+
+\section{Test Deliverables}
+\begin{itemize}
+    \item Test case document.
+    \item Laporan hasil eksekusi test.
+    \item Laporan bug lengkap dengan langkah reproduksi.
+    \item Ringkasan pengujian dan rekomendasi.
+\end{itemize}
+
+\section{Testing Tasks}
+\begin{itemize}
+    \item Penyusunan test plan.
+    \item Dokumentasi test case.
+    \item Persiapan data uji (dummy users, obat).
+    \item Eksekusi test (unit, feature, integration).
+    \item Laporan akhir hasil pengujian.
+\end{itemize}
+
+\section{Environmental Needs}
+\begin{itemize}
+    \item Laravel 11, PHP 8.2, MySQL 8.
+    \item Web server: Apache/Nginx.
+    \item Tools: PHPUnit/Pest, Postman, JMeter, OWASP ZAP.
+    \item Data uji: dummy users (admin, user), dummy obat.
+\end{itemize}
+
+\section{Responsibilities}
+\begin{itemize}
+    \item \textbf{Test Manager}: koordinasi, review hasil.
+    \item \textbf{Tester}: eksekusi test, dokumentasi bug.
+    \item \textbf{Developer}: memperbaiki bug dan mengupdate kode.
+\end{itemize}
+
+\section{Staffing and Training Needs}
+\begin{itemize}
+    \item 2-3 penguji dengan pemahaman dasar software testing.
+    \item Pelatihan penggunaan Laravel Testing, Postman, JMeter.
+\end{itemize}
+
+\section{Schedule}
+\begin{itemize}
+    \item 1-14 September 2025: Penyusunan ERD, Use Case, Activity, Sequence Diagram.
+    \item 17-30 September 2025: Pembuatan API, controller, seeder, middleware.
+    \item 1-7 Oktober 2025: Unit testing, API testing, bug fixing.
+    \item 8-15 Oktober 2025: Retesting dan laporan akhir.
+\end{itemize}
+
+\section{Risks and Contingencies}
+\begin{itemize}
+    \item Risiko keterlambatan coding backend $\rightarrow$ mitigasi: paralelkan pekerjaan frontend dan backend.
+    \item Risiko kurangnya pemahaman testing tools $\rightarrow$ mitigasi: training internal singkat.
+    \item Risiko data dummy tidak representatif $\rightarrow$ mitigasi: gunakan data dari WHO/Depkes.
+\end{itemize}
+
+\section{Approvals}
+Disetujui oleh:
+\begin{itemize}
+    \item Test Manager: Rezky Robbyanto Akbari
+    \item Project Manager: A.M.Yusran Mazidan
+\end{itemize}
+
+
+\end{document}
