@@ -1,0 +1,64 @@
+@startuml Halobat System Use Case
+left to right direction
+
+actor Guest
+actor User
+actor Admin
+actor Superadmin
+
+Superadmin <|-- Admin
+User <|-- Admin
+
+rectangle "Halobat Use Cases" {
+    ' Authentication
+    usecase "Sign In" as AUTH1
+    usecase "Login" as AUTH2
+    usecase "Logout" as AUTH3
+    
+    ' Drug Catalog
+    usecase "View Drug Details" as CAT1
+    usecase "Search Drugs" as CAT2
+    usecase "Filter Drugs" as CAT3
+    usecase "Chat With AI" as CAT4
+    usecase "View Recommended Drugs" as CAT5
+    usecase "View Diagnoses" as CAT6
+    
+    ' User Management
+    usecase "Manage Users" as UM1
+    usecase "Manage Roles" as UM2
+    usecase "Change User Role" as UM3
+    
+    ' Drug Management
+    usecase "Manage Drugs" as DM1
+    usecase "Manage Manufacturers" as DM3
+    usecase "Manage Dosage Forms" as DM4
+    usecase "Manage Active Ingredients" as DM5
+    
+}
+
+' Authentication relationships
+Guest --> AUTH1
+Guest --> AUTH2
+User --> AUTH3
+
+' Drug Catalog relationships
+User --> CAT1
+User --> CAT2
+User --> CAT3
+User --> CAT4
+CAT4 --> CAT5 : <<include>>
+CAT4 --> CAT6 : <<include>>
+
+' User Management relationships
+Admin --> UM1
+Superadmin --> UM2
+UM3 --> UM2 : <<include>>
+
+' Drug Management relationships
+Admin --> DM1
+Superadmin --> DM3
+Superadmin --> DM4
+Superadmin --> DM5
+
+
+@enduml

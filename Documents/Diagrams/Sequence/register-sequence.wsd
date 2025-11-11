@@ -1,4 +1,4 @@
-@startuml Register Sequence
+@startuml Sign Up Sequence
 actor User
 participant System
 participant Database
