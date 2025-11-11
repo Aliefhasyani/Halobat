@@ -1,4 +1,4 @@
-@startuml Register Activity
+@startuml Sign Up Activity
 start
 repeat
   :Guest enters registration details;
