@@ -1,15 +1,23 @@
+// src/services/api.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+// Root domain (Sanctum requires the csrf cookie endpoint at the root)
+const API_ROOT = 'https://halobat-production.up.railway.app';
+const API_PREFIX = '/api';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_ROOT,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  withCredentials: true, // needed for Sanctum cookie-based auth
 });
 
+// Helper to ensure CSRF cookie is set (Sanctum)
+export const ensureCsrf = () => api.get('/sanctum/csrf-cookie');
+
+// Request Interceptor: optionally attach token-based Authorization if available
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token');
@@ -18,11 +26,10 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
+// Response Interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -34,19 +41,55 @@ api.interceptors.response.use(
   }
 );
 
+// ==================== AUTH APIs ====================
 export const authAPI = {
-  register: (userData) => api.post('/register', userData),
-  login: (credentials) => api.post('/login', credentials),
-  logout: () => api.post('/logout'),
-  getCurrentUser: () => api.get('/user'),
+  // For Sanctum use cookie flow: call ensureCsrf() first
+  register: async (userData) => {
+    await ensureCsrf();
+    return api.post(`${API_PREFIX}/register`, userData);
+  },
+  login: async (credentials) => {
+    await ensureCsrf();
+    return api.post(`${API_PREFIX}/login`, credentials);
+  },
+  logout: async () => {
+    await ensureCsrf();
+    return api.post(`${API_PREFIX}/logout`);
+  },
+  getCurrentUser: () => api.get(`${API_PREFIX}/user`),
 };
 
+// ==================== USER APIs ====================
 export const userAPI = {
-  getAll: () => api.get('/users'),
-  getById: (id) => api.get(`/users/${id}`),
-  create: (userData) => api.post('/users', userData),
-  update: (id, userData) => api.put(`/users/${id}`, userData),
-  delete: (id) => api.delete(`/users/${id}`),
+  getAll: (params) => api.get(`${API_PREFIX}/users`, { params }),
+  getById: (id) => api.get(`${API_PREFIX}/users/${id}`),
+  create: (userData) => api.post(`${API_PREFIX}/users`, userData),
+  update: (id, userData) => api.put(`${API_PREFIX}/users/${id}`, userData),
+  delete: (id) => api.delete(`${API_PREFIX}/users/${id}`),
+};
+
+// ==================== OBAT (DRUGS) APIs ====================
+export const obatAPI = {
+  getAll: (params) => api.get(`${API_PREFIX}/drugs`, { params }),
+  getById: (id) => api.get(`${API_PREFIX}/drugs/${id}`),
+  create: (obatData) => api.post(`${API_PREFIX}/drugs`, obatData),
+  update: (id, obatData) => api.put(`${API_PREFIX}/drugs/${id}`, obatData),
+  delete: (id) => api.delete(`${API_PREFIX}/drugs/${id}`),
+};
+
+// ==================== ROLES APIs ====================
+export const roleAPI = {
+  getAll: (params) => api.get(`${API_PREFIX}/roles`, { params }),
+  getById: (id) => api.get(`${API_PREFIX}/roles/${id}`),
+  create: (roleData) => api.post(`${API_PREFIX}/roles`, roleData),
+  update: (id, roleData) => api.put(`${API_PREFIX}/roles/${id}`, roleData),
+  delete: (id) => api.delete(`${API_PREFIX}/roles/${id}`),
+};
+
+// ==================== REPORTS APIs ====================
+export const reportAPI = {
+  getAll: (params) => api.get(`${API_PREFIX}/reports`, { params }),
+  getById: (id) => api.get(`${API_PREFIX}/reports/${id}`),
 };
 
 export default api;
