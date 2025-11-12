@@ -52,42 +52,74 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.login(credentials);
       
-      if (response.data.success) {
+      // Handle response - check both response.data.success and fallback to checking message
+      const success = response.data?.success !== false; // default true if not explicitly false
+      
+      if (success && response.data) {
         const { token, user } = response.data;
         
-        localStorage.setItem('auth_token', token);
-        setToken(token);
-        setUser(user);
+        // Store token if provided
+        if (token) {
+          localStorage.setItem('auth_token', token);
+          setToken(token);
+        }
+        
+        // Store user if provided
+        if (user) {
+          setUser(user);
+        }
         
         return { success: true, data: response.data };
       }
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Login failed' 
+        error: error.response?.data?.message || error.message || 'Login failed' 
       };
     }
+    
+    // Fallback if no success response
+    return { 
+      success: false, 
+      error: 'Login failed - no response received' 
+    };
   };
 
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
       
-      if (response.data.success) {
+      // Handle response - check both response.data.success and fallback to checking message
+      const success = response.data?.success !== false; // default true if not explicitly false
+      
+      if (success && response.data) {
         const { token, user } = response.data;
         
-        localStorage.setItem('auth_token', token);
-        setToken(token);
-        setUser(user);
+        // Store token if provided
+        if (token) {
+          localStorage.setItem('auth_token', token);
+          setToken(token);
+        }
+        
+        // Store user if provided
+        if (user) {
+          setUser(user);
+        }
         
         return { success: true, data: response.data };
       }
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Registration failed' 
+        error: error.response?.data?.message || error.message || 'Registration failed' 
       };
     }
+    
+    // Fallback if no success response
+    return { 
+      success: false, 
+      error: 'Registration failed - no response received' 
+    };
   };
 
   const logout = async () => {
