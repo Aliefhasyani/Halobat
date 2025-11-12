@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -28,22 +30,29 @@ class UserController extends Controller
     }
 
     public function show($id){
-        $user = User::findOrFail($id);
+        try{
+            $user = User::findOrFail($id);
         
-        $user_data = [
-            'full_name' => $user->full_name,
-            'username' => $user->username,
-            'email' => $user->email,
-            'role_id' => $user->role_id,
-            'role' => $user->role->name
-        ];
-        
-        
-        return response()->json(
-            [
-                'success' => true,
-                'data' => $user_data
+            $user_data = [
+                'full_name' => $user->full_name,
+                'username' => $user->username,
+                'email' => $user->email,
+                'role_id' => $user->role_id,
+                'role' => $user->role->name
+            ];
+            
+            
+            return response()->json(
+                [
+                    'success' => true,
+                    'data' => $user_data
+                ]);
+        }catch(ModelNotFoundException $ex){
+            return response()->json([
+                'success' => false,
+                'error' => $ex->getMessage()
             ]);
+        }
     }
 
     public function store(Request $request){
