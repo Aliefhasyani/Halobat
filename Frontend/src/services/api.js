@@ -17,10 +17,6 @@ const api = axios.create({
 });
 
 // Request Interceptor: attach Bearer token for API authentication
-// Helper to ensure CSRF cookie is set (Sanctum)
-export const ensureCsrf = () => api.get('/sanctum/csrf-cookie');
-
-// Request Interceptor: optionally attach token-based Authorization if available
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token');
@@ -46,7 +42,6 @@ api.interceptors.response.use(
 
 // ==================== AUTH APIs ====================
 export const authAPI = {
-  // API routes are CSRF-exempt on the backend, so no need for ensureCsrf
   register: async (userData) => {
     return api.post(`${API_PREFIX}/register`, userData);
   },
@@ -54,17 +49,6 @@ export const authAPI = {
     return api.post(`${API_PREFIX}/login`, credentials);
   },
   logout: async () => {
-  // For Sanctum use cookie flow: call ensureCsrf() first
-  register: async (userData) => {
-    await ensureCsrf();
-    return api.post(`${API_PREFIX}/register`, userData);
-  },
-  login: async (credentials) => {
-    await ensureCsrf();
-    return api.post(`${API_PREFIX}/login`, credentials);
-  },
-  logout: async () => {
-    await ensureCsrf();
     return api.post(`${API_PREFIX}/logout`);
   },
   getCurrentUser: () => api.get(`${API_PREFIX}/user`),
