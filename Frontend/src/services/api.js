@@ -1,6 +1,8 @@
 // src/services/api.js
 import axios from 'axios';
 
+// THIS IS RUNNING IN LOCALHOST. http://localhost:3000
+
 // Root domain (Sanctum requires the csrf cookie endpoint at the root)
 const API_ROOT = 'https://halobat-production.up.railway.app';
 const API_PREFIX = '/api';
@@ -14,6 +16,7 @@ const api = axios.create({
   withCredentials: true, // needed for Sanctum cookie-based auth
 });
 
+// Request Interceptor: attach Bearer token for API authentication
 // Helper to ensure CSRF cookie is set (Sanctum)
 export const ensureCsrf = () => api.get('/sanctum/csrf-cookie');
 
@@ -43,6 +46,14 @@ api.interceptors.response.use(
 
 // ==================== AUTH APIs ====================
 export const authAPI = {
+  // API routes are CSRF-exempt on the backend, so no need for ensureCsrf
+  register: async (userData) => {
+    return api.post(`${API_PREFIX}/register`, userData);
+  },
+  login: async (credentials) => {
+    return api.post(`${API_PREFIX}/login`, credentials);
+  },
+  logout: async () => {
   // For Sanctum use cookie flow: call ensureCsrf() first
   register: async (userData) => {
     await ensureCsrf();

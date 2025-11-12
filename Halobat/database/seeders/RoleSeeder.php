@@ -14,15 +14,17 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         $roles = [
-            [
-                'name' => 'admin' , 'description' => 'and admin'
-            ]
-            ];
+            ['name' => 'user', 'description' => 'Regular application user'],
+            ['name' => 'admin', 'description' => 'Administrator with elevated privileges'],
+            ['name' => 'superadmin', 'description' => 'Super administrator with full access'],
+        ];
 
-            foreach($roles as $role){
-                Role::create(
-                    $role
-                );
+        foreach ($roles as $role) {
+            // Idempotent: only create if a role with the same name doesn't already exist
+            $existing = Role::where('name', $role['name'])->first();
+            if (! $existing) {
+                Role::create($role);
             }
+        }
     }
 }
