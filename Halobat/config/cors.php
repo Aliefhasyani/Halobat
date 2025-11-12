@@ -19,7 +19,12 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // Allow your local frontend during development. Add your production
+    // frontend origin(s) here when deploying (do NOT use '*').
+    'allowed_origins' => [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+    ],
 
     'allowed_origins_patterns' => [],
 
@@ -28,7 +33,8 @@ return [
     'exposed_headers' => [],
 
     'max_age' => 0,
-    // TODO: Change 'supports_credentials' to true if needed
-    'supports_credentials' => false,
+    // Enable credentials so the browser will accept `Set-Cookie` and
+    // send cookies on subsequent requests (required for Sanctum cookie flow).
+    'supports_credentials' => true,
 
 ];
