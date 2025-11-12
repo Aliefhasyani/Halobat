@@ -28,7 +28,7 @@ return [
     'exposed_headers' => [],
 
     'max_age' => 0,
-
-    'supports_credentials' => true,
+    // TODO: Change 'supports_credentials' to true if needed
+    'supports_credentials' => false,
 
 ];
