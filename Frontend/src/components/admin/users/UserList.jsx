@@ -11,109 +11,50 @@ const UserList = () => {
   const [filterRole, setFilterRole] = useState('all');
 
   useEffect(() => {
-    const mockUsers = [
-      {
-        id: 1,
-        created_at: '2024-12-27',
-        username: 'dianne.russell',
-        email: 'dianne.russell@halobat.com',
-        full_name: 'Dianne Russell',
-        phone: '+62 812-3456-7890',
-        in_charge: 'Kristin Watson',
-        role: 'SUPER ADMIN',
-        status: 'active'
-      },
-      {
-        id: 2,
-        created_at: '2023-02-03',
-        username: 'bessie.cooper',
-        email: 'bessie.cooper@halobat.com',
-        full_name: 'Bessie Cooper',
-        phone: '+62 813-4567-8901',
-        in_charge: 'Kristin Watson',
-        role: 'ADMIN',
-        status: 'active'
-      },
-      {
-        id: 3,
-        created_at: '2024-11-15',
-        username: 'marvin.mckinney',
-        email: 'marvin.mckinney@halobat.com',
-        full_name: 'Marvin McKinney',
-        phone: '+62 814-5678-9012',
-        in_charge: 'Jane Cooper',
-        role: 'USER',
-        status: 'active'
-      },
-      {
-        id: 4,
-        created_at: '2024-10-08',
-        username: 'jerome.bell',
-        email: 'jerome.bell@halobat.com',
-        full_name: 'Jerome Bell',
-        phone: '+62 815-6789-0123',
-        in_charge: 'Kristin Watson',
-        role: 'USER',
-        status: 'inactive'
-      },
-      {
-        id: 5,
-        created_at: '2024-09-22',
-        username: 'floyd.miles',
-        email: 'floyd.miles@halobat.com',
-        full_name: 'Floyd Miles',
-        phone: '+62 816-7890-1234',
-        in_charge: 'Jane Cooper',
-        role: 'USER',
-        status: 'active'
-      },
-      {
-        id: 6,
-        created_at: '2024-08-14',
-        username: 'cameron.williamson',
-        email: 'cameron.w@halobat.com',
-        full_name: 'Cameron Williamson',
-        phone: '+62 817-8901-2345',
-        in_charge: 'Kristin Watson',
-        role: 'ADMIN',
-        status: 'active'
-      },
-      {
-        id: 7,
-        created_at: '2024-07-30',
-        username: 'brooklyn.simmons',
-        email: 'brooklyn.s@halobat.com',
-        full_name: 'Brooklyn Simmons',
-        phone: '+62 818-9012-3456',
-        in_charge: 'Jane Cooper',
-        role: 'USER',
-        status: 'active'
-      },
-    ];
-    
-    console.log('Bypass: Loading mock users data');
-    
-    let filteredUsers = mockUsers;
-    
-    if (searchTerm) {
-      filteredUsers = filteredUsers.filter(user =>
-        user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.username.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    if (filterRole !== 'all') {
-      filteredUsers = filteredUsers.filter(user => user.role === filterRole);
-    }
-    
-    setUsers(filteredUsers);
-    setLoading(false);
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const response = await userAPI.getAll();
+        
+        if (response.data.success) {
+          let fetchedUsers = response.data.data || [];
+          
+          // Apply filters
+          if (searchTerm) {
+            fetchedUsers = fetchedUsers.filter(user =>
+              user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              user.username?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+          }
+          
+          if (filterRole !== 'all') {
+            fetchedUsers = fetchedUsers.filter(user => user.role === filterRole);
+          }
+          
+          setUsers(fetchedUsers);
+        }
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, [currentPage, searchTerm, filterRole]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      alert('Bypass Mode: Delete functionality disabled');
+      try {
+        await userAPI.delete(id);
+        setUsers(users.filter(user => user.id !== id));
+        alert('User deleted successfully');
+      } catch (error) {
+        console.error('Delete failed:', error);
+        alert('Failed to delete user');
+      }
     }
   };
 

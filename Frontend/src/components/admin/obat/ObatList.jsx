@@ -12,120 +12,69 @@ const ObatList = () => {
   const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
-    const mockObat = [
-      {
-        id: 1,
-        created_at: '2024-12-27',
-        name: 'Paracetamol 500mg',
-        category: 'Pain Relief',
-        manufacturer: 'Kalbe Farma',
-        stock: 1500,
-        price: 5000,
-        status: 'available',
-        sku: 'MED-001',
-        expiry_date: '2026-12-31'
-      },
-      {
-        id: 2,
-        created_at: '2024-12-20',
-        name: 'Amoxicillin 500mg',
-        category: 'Antibiotic',
-        manufacturer: 'Kimia Farma',
-        stock: 850,
-        price: 15000,
-        status: 'available',
-        sku: 'MED-002',
-        expiry_date: '2026-06-30'
-      },
-      {
-        id: 3,
-        created_at: '2024-12-15',
-        name: 'Ibuprofen 400mg',
-        category: 'Anti-inflammatory',
-        manufacturer: 'Sanbe Farma',
-        stock: 0,
-        price: 8000,
-        status: 'out_of_stock',
-        sku: 'MED-003',
-        expiry_date: '2025-12-31'
-      },
-      {
-        id: 4,
-        created_at: '2024-12-10',
-        name: 'Omeprazole 20mg',
-        category: 'Gastric',
-        manufacturer: 'Dexa Medica',
-        stock: 600,
-        price: 12000,
-        status: 'available',
-        sku: 'MED-004',
-        expiry_date: '2027-03-15'
-      },
-      {
-        id: 5,
-        created_at: '2024-12-05',
-        name: 'Cetirizine 10mg',
-        category: 'Antihistamine',
-        manufacturer: 'Kalbe Farma',
-        stock: 320,
-        price: 7500,
-        status: 'available',
-        sku: 'MED-005',
-        expiry_date: '2026-09-20'
-      },
-      {
-        id: 6,
-        created_at: '2024-11-28',
-        name: 'Metformin 500mg',
-        category: 'Diabetes',
-        manufacturer: 'Indofarma',
-        stock: 45,
-        price: 9000,
-        status: 'low_stock',
-        sku: 'MED-006',
-        expiry_date: '2026-11-30'
-      },
-      {
-        id: 7,
-        created_at: '2024-11-20',
-        name: 'Aspirin 100mg',
-        category: 'Cardiovascular',
-        manufacturer: 'Bayer',
-        stock: 0,
-        price: 6500,
-        status: 'discontinued',
-        sku: 'MED-007',
-        expiry_date: '2025-08-15'
-      },
-    ];
-    
-    console.log('Bypass: Loading mock obat data');
-    
-    let filteredObat = mockObat;
-    
-    if (searchTerm) {
-      filteredObat = filteredObat.filter(obat =>
-        obat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        obat.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        obat.sku.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    if (filterCategory !== 'all') {
-      filteredObat = filteredObat.filter(obat => obat.category === filterCategory);
-    }
+    const fetchObat = async () => {
+      setLoading(true);
+      try {
+        const response = await obatAPI.getAll();
+        
+        if (response.data.success) {
+          let fetchedDrugs = response.data.data || [];
+          
+          // Map backend drug data to frontend obat format
+          fetchedDrugs = fetchedDrugs.map(drug => ({
+            id: drug.drug_id,
+            name: drug.generic_name,
+            category: drug.dosage_form_data?.name || 'N/A',
+            manufacturer: drug.manufacturer_data?.name || 'N/A',
+            price: drug.price,
+            description: drug.description,
+            // Note: Backend doesn't have stock, status, sku, expiry_date yet
+            stock: 0,
+            status: 'available',
+            sku: `MED-${drug.drug_id}`,
+            expiry_date: null,
+          }));
+          
+          // Apply filters
+          if (searchTerm) {
+            fetchedDrugs = fetchedDrugs.filter(obat =>
+              obat.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              obat.manufacturer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              obat.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+          }
+          
+          if (filterCategory !== 'all') {
+            fetchedDrugs = fetchedDrugs.filter(obat => obat.category === filterCategory);
+          }
 
-    if (filterStatus !== 'all') {
-      filteredObat = filteredObat.filter(obat => obat.status === filterStatus);
-    }
-    
-    setObatList(filteredObat);
-    setLoading(false);
+          if (filterStatus !== 'all') {
+            fetchedDrugs = fetchedDrugs.filter(obat => obat.status === filterStatus);
+          }
+          
+          setObatList(fetchedDrugs);
+        }
+      } catch (error) {
+        console.error('Failed to fetch drugs:', error);
+        setObatList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchObat();
   }, [currentPage, searchTerm, filterCategory, filterStatus]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this medicine?')) {
-      alert('Bypass Mode: Delete functionality disabled');
+      try {
+        await obatAPI.delete(id);
+        setObatList(obatList.filter(obat => obat.id !== id));
+        alert('Medicine deleted successfully');
+      } catch (error) {
+        console.error('Delete failed:', error);
+        alert('Failed to delete medicine');
+      }
     }
   };
 

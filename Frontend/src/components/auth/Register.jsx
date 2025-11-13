@@ -43,7 +43,9 @@ const Register = () => {
     const result = await register(formData);
     
     if (result.success) {
-      navigate('/dashboard');
+      // After registration, redirect to login since backend doesn't return token
+      navigate('/login');
+      alert('Registrasi berhasil! Silakan login.');
     } else {
       setError(result.error);
     }
