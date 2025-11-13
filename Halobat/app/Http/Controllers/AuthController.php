@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redis;
 
 
+
 class AuthController extends Controller
 {
     public function register(Request $request){
@@ -55,5 +56,16 @@ class AuthController extends Controller
                     "message" => "Invalid email or password"
                 ], 401);
         }
+    }
+
+   public function logout(Request $request){
+        $user = $request->user(); 
+       
+        $user->currentAccessToken()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User logged out!'
+        ]);
     }
 }

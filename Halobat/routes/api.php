@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\ActiveIngredientController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BrandController;
 use App\Http\Controllers\DiagnosesController;
 use App\Http\Controllers\DosageFormController;
 use App\Http\Controllers\DrugController;
@@ -23,8 +25,10 @@ Route::post('/login',[AuthController::class,'login'])->name('login');
 Route::post('/logout',[AuthController::class,'logout'])->name('logout')->middleware('auth:sanctum');
 
 Route::apiResource('users', UserController::class);
-Route::apiResource('diagnoses', DiagnosesController::class);
+// Route::apiResource('diagnoses', DiagnosesController::class);
 Route::apiResource('admins', AdminController::class);
 Route::apiResource('manufacturers', ManufacturerController::class);
 Route::apiResource('dosage-forms', DosageFormController::class);
 Route::apiResource('drugs', DrugController::class);
+Route::apiResource('brands', BrandController::class);
+Route::apiResource('active_ingredients', ActiveIngredientController::class);

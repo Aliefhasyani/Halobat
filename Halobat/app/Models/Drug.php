@@ -16,4 +16,8 @@ class Drug extends Model
     public function dosageForm(){
         return $this->belongsTo(DosageForm::class);
     }
+
+    public function brand(){
+        return $this->hasMany(Brand::class);
+    }
 }
