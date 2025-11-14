@@ -25,7 +25,7 @@ class BrandController extends Controller
                     'picture' => $brand->drug->picture,
                 ] : null,
             ];
-        });
+        })->values();
 
         return response()->json([
             'success' => true,

@@ -10,6 +10,7 @@ use App\Http\Controllers\DrugController;
 use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\UserController;
 use App\Models\Manufacturer;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,3 +33,4 @@ Route::apiResource('dosage-forms', DosageFormController::class);
 Route::apiResource('drugs', DrugController::class);
 Route::apiResource('brands', BrandController::class);
 Route::apiResource('active_ingredients', ActiveIngredientController::class);
+Route::apiResource('roles', Role::class);

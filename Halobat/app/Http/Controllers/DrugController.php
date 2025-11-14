@@ -28,7 +28,7 @@ class DrugController extends Controller
                     'name' => $drug->dosageForm->name,
                 ],
             ];
-        });
+        })->values();
 
         return response()->json([
             'success' => true,
@@ -70,8 +70,7 @@ class DrugController extends Controller
         
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request){
         $validated = $request->validate([
             'generic_name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -79,19 +78,29 @@ class DrugController extends Controller
             'price' => 'required|numeric',
             'manufacturer_id' => 'required|exists:manufacturers,id',
             'dosage_form_id' => 'required|exists:dosage_forms,id',
+
+        
+            'active_ingredient_ids' => 'nullable|array',
+            'active_ingredient_ids.*' => 'exists:active_ingredients,id',
         ]);
 
+        
         $drug = Drug::create($validated);
+
+    
+        if ($request->filled('active_ingredient_ids')) {
+            $drug->activeIngredients()->sync($request->active_ingredient_ids);
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Drug created successfully.',
-            'data' => $drug
+            'data' => $drug->load(['activeIngredients'])
         ], 201);
     }
 
-    public function update(Request $request, $id)
-    {
+
+    public function update(Request $request, $id){
         $validated = $request->validate([
             'generic_name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
@@ -99,17 +108,29 @@ class DrugController extends Controller
             'price' => 'sometimes|required|numeric',
             'manufacturer_id' => 'sometimes|required|exists:manufacturers,id',
             'dosage_form_id' => 'sometimes|required|exists:dosage_forms,id',
+
+            
+            'active_ingredient_ids' => 'nullable|array',
+            'active_ingredient_ids.*' => 'exists:active_ingredients,id',
         ]);
 
         $drug = Drug::findOrFail($id);
+
+        
         $drug->update($validated);
+
+    
+        if ($request->filled('active_ingredient_ids')) {
+            $drug->activeIngredients()->sync($request->active_ingredient_ids);
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Drug updated successfully.',
-            'data' => $drug
+            'data' => $drug->load(['activeIngredients'])
         ]);
     }
+
 
     public function destroy($id)
     {

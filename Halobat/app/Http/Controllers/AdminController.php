@@ -19,7 +19,7 @@ class AdminController extends Controller
                 'role_id' => $user->role_id,
                 'role' => $user->role->name,
             ];
-        });
+        })->values();
 
         return response()->json([
             'success' => true,

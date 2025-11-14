@@ -9,28 +9,57 @@ use Illuminate\Http\Request;
 class DosageFormController extends Controller
 {
     public function index(){
-        $dosages = DosageForm::all();
-        
+        $dosages = DosageForm::with('drugs')->get();
+        $formatted = $dosages->map(function($dosage){
+            return [
+                'dosage_id' => $dosage->id,
+                'dosage_name' => $dosage->name,
+                'related_drugs' => $dosage->drugs->map(function($drug){
+                    return [
+                        'drug_id' => $drug->id,
+                        'generic_name' => $drug->generic_name,
+                        'description' => $drug->description,
+                        'picture' => $drug->picture,
+                        'price' => $drug->price ?? null,
+                    ];
+                })->values(),
+            ];
+        })->values();
+
         return response()->json([
             'success' => true,
-            'data' => $dosages
+            'data' => $formatted,
         ]);
     }
 
     public function show($id){
-       
         try{
-            $dosage = DosageForm::findOrFail($id);
+            $dosage = DosageForm::with('drugs')->findOrFail($id);
+
+            $data = [
+                'dosage_id' => $dosage->id,
+                'dosage_name' => $dosage->name,
+                'related_drugs' => $dosage->drugs->map(function($drug){
+                    return [
+                        'drug_id' => $drug->id,
+                        'generic_name' => $drug->generic_name,
+                        'description' => $drug->description,
+                        'picture' => $drug->picture,
+                        'price' => $drug->price ?? null,
+                    ];
+                })->values(),
+            ];
+
             return response()->json([
                 'success' => true,
-                'data' => $dosage
+                'data' => $data
             ]);
         }catch(ModelNotFoundException $ex){
                return response()->json([
                 'success' => false,
-                'errors' => $ex->getMessage(),
-               ]);
-        };
+                'error' => $ex->getMessage(),
+               ], 404);
+        }
         
      
     }

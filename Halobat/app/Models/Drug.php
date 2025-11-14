@@ -20,4 +20,8 @@ class Drug extends Model
     public function brand(){
         return $this->hasMany(Brand::class);
     }
+    
+    public function activeIngredients(){
+        return $this->belongsToMany(ActiveIngredient::class, 'drug_active_ingredients');
+    }
 }

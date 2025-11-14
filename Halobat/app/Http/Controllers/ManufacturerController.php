@@ -9,28 +9,57 @@ use Illuminate\Http\Request;
 class ManufacturerController extends Controller
 {
     public function index(){
-        $manufacturers = Manufacturer::all();
-        
+        $manufacturers = Manufacturer::with('drugs')->get();
+        $formatted = $manufacturers->map(function($manufacturer){
+            return [
+                'manufacturer_id' => $manufacturer->id,
+                'manufacturer_name' => $manufacturer->name,
+                'related_drugs' => $manufacturer->drugs->map(function($drug){
+                    return [
+                        'drug_id' => $drug->id,
+                        'generic_name' => $drug->generic_name,
+                        'description' => $drug->description,
+                        'picture' => $drug->picture,
+                        'price' => $drug->price ?? null,
+                    ];
+                })->values(),
+            ];
+        })->values();
+
         return response()->json([
             'success' => true,
-            'data' => $manufacturers
+            'data' => $formatted
         ]);
     }
 
     public function show($id){
-       
         try{
-            $manufacturer = Manufacturer::findOrFail($id);
+            $manufacturer = Manufacturer::with('drugs')->findOrFail($id);
+
+            $data = [
+                'manufacturer_id' => $manufacturer->id,
+                'manufacturer_name' => $manufacturer->name,
+                'related_drugs' => $manufacturer->drugs->map(function($drug){
+                    return [
+                        'drug_id' => $drug->id,
+                        'generic_name' => $drug->generic_name,
+                        'description' => $drug->description,
+                        'picture' => $drug->picture,
+                        'price' => $drug->price ?? null,
+                    ];
+                })->values(),
+            ];
+
             return response()->json([
                 'success' => true,
-                'data' => $manufacturer
+                'data' => $data
             ]);
         }catch(ModelNotFoundException $ex){
             return response()->json([
                 'success' => false,
-                'errors' => $ex->getMessage(),
+                'error' => $ex->getMessage(),
                ],404);
-        };
+        }
         
      
     }
