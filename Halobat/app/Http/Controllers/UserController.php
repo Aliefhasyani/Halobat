@@ -2,14 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum')->only(['store','update','destroy']);
+        $this->middleware('role:admin,superadmin')->only(['store','update','destroy']);
+    }
     public function index(){
         $users = User::with('role')->get();
 
@@ -61,11 +67,13 @@ class UserController extends Controller
                 'full_name' => 'required|string|max:255',
                 'username' => 'required|string|max:255',
                 'email'=> 'required|email',
-                'password' => 'required|string|min:8',
-                'role_id' => 'required|exists:roles,id'
+                'password' => 'required|string|min:8'
             ]);
 
         $data['password'] = Hash::make($data['password']);
+
+        $defaultRole = Role::where('name', 'user')->first();
+        $data['role_id'] = $defaultRole ? $defaultRole->id : null;
 
         $created_data = User::create($data);
 
@@ -87,10 +95,18 @@ class UserController extends Controller
                 'username' => 'required|string|max:255',
                 'email'=> 'required|email',
                 'password' => 'required|string|min:8',
-                'role_id' => 'required|exists:roles,id'
+                'role_id' => 'sometimes|exists:roles,id'
             ]);
 
         $data['password'] = Hash::make($data['password']);
+
+        // Only superadmin may change role_id
+        if (array_key_exists('role_id', $data) && Auth::user()->role->name !== 'superadmin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Only superadmin can change user roles.'
+            ], 403);
+        }
 
         $user->update($data);
         $user->refresh();

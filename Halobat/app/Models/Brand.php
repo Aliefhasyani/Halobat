@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Brand extends Model
 {
     protected $table = 'brands';
-    protected $fillable = ['name','picture','drug_id'];
+    protected $fillable = ['name','picture','drug_id', 'price'];
 
     public function drug(){
         return $this->belongsTo(Drug::class);

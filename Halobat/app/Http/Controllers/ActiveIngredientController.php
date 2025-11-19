@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 
 class ActiveIngredientController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum')->only(['store','update','destroy']);
+        $this->middleware('role:admin,superadmin')->only(['store','update','destroy']);
+    }
     
     public function index(){    
         $ingredients = ActiveIngredient::with('drugs')->get();

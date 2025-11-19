@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use Laravel\Sanctum\HasApiTokens; 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -18,11 +19,13 @@ class AuthController extends Controller
             'full_name' => 'string|required|max:255',
             'username' => 'string|required|max:255',
             'email' =>  'required|email',
-            'password' => 'required|min:8',
-            'role_id' => 'required|exists:roles,id'
+            'password' => 'required|min:8'
         ]);
 
         $data['password'] = Hash::make($data['password']);
+        
+        $defaultRole = Role::where('name', 'user')->first();
+        $data['role_id'] = $defaultRole ? $defaultRole->id : null;
         
         $user = User::create($data);
 
