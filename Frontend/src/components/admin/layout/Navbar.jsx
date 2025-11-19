@@ -11,10 +11,15 @@ const Navbar = ({ toggleSidebar, collapsed }) => {
 
   const getPageTitle = () => {
     const path = location.pathname;
-    if (path.includes('obat')) return 'Obat Management';
+    if (path.includes('dashboard')) return 'Dashboard';
     if (path.includes('users')) return 'Users Management';
-    if (path.includes('reports')) return 'Reports & Analytics';
     if (path.includes('roles')) return 'Roles Management';
+    if (path.includes('drugs')) return 'Drugs Management';
+    if (path.includes('brands')) return 'Brands Management';
+    if (path.includes('manufacturers')) return 'Manufacturers Management';
+    if (path.includes('dosage-forms')) return 'Dosage Forms Management';
+    if (path.includes('active-ingredients')) return 'Active Ingredients Management';
+    if (path.includes('diagnoses')) return 'Diagnoses';
     return 'Admin Panel';
   };
 
@@ -59,7 +64,7 @@ const Navbar = ({ toggleSidebar, collapsed }) => {
             </div>
             <div className="user-info">
               <span className="user-name">{user?.full_name || 'Admin'}</span>
-              <span className="user-role">{user?.role || 'Administrator'}</span>
+              <span className="user-role">{user?.role?.name || user?.role || 'Administrator'}</span>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className={`dropdown-icon ${showDropdown ? 'open' : ''}`}>
               <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
