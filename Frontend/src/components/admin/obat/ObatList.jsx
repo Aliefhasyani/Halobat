@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { obatAPI } from '../../../services/api';
+import { drugAPI } from '../../../services/api'; // ← GANTI INI (obatAPI → drugAPI)
 import './Obat.css';
 
 const ObatList = () => {
@@ -15,7 +15,7 @@ const ObatList = () => {
     const fetchObat = async () => {
       setLoading(true);
       try {
-        const response = await obatAPI.getAll();
+        const response = await drugAPI.getAll(); // ← GANTI INI (obatAPI → drugAPI)
         
         if (response.data.success) {
           let fetchedDrugs = response.data.data || [];
@@ -28,6 +28,7 @@ const ObatList = () => {
             manufacturer: drug.manufacturer_data?.name || 'N/A',
             price: drug.price,
             description: drug.description,
+            picture: drug.picture,
             // Note: Backend doesn't have stock, status, sku, expiry_date yet
             stock: 0,
             status: 'available',
@@ -68,7 +69,7 @@ const ObatList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this medicine?')) {
       try {
-        await obatAPI.delete(id);
+        await drugAPI.delete(id); // ← GANTI INI (obatAPI → drugAPI)
         setObatList(obatList.filter(obat => obat.id !== id));
         alert('Medicine deleted successfully');
       } catch (error) {
@@ -136,7 +137,7 @@ const ObatList = () => {
     <div className="admin-page">
       <div className="page-header">
         <div className="header-left">
-          <h2 className="table-title">Obat Management</h2>
+          <h2 className="table-title">Drugs Management</h2>
           <p className="table-subtitle">Manage medicine inventory and stock levels</p>
         </div>
         
@@ -178,13 +179,11 @@ const ObatList = () => {
             onChange={(e) => setFilterCategory(e.target.value)}
           >
             <option value="all">All Categories</option>
-            <option value="Pain Relief">Pain Relief</option>
-            <option value="Antibiotic">Antibiotic</option>
-            <option value="Anti-inflammatory">Anti-inflammatory</option>
-            <option value="Gastric">Gastric</option>
-            <option value="Antihistamine">Antihistamine</option>
-            <option value="Diabetes">Diabetes</option>
-            <option value="Cardiovascular">Cardiovascular</option>
+            <option value="Tablet">Tablet</option>
+            <option value="Capsule">Capsule</option>
+            <option value="Syrup">Syrup</option>
+            <option value="Injection">Injection</option>
+            <option value="Cream">Cream</option>
           </select>
 
           <select 
@@ -216,12 +215,12 @@ const ObatList = () => {
                 <input type="checkbox" className="checkbox" />
               </th>
               <th>MEDICINE INFO</th>
-              <th>CATEGORY</th>
+              <th>DOSAGE FORM</th>
               <th>MANUFACTURER</th>
               <th>STOCK</th>
               <th>PRICE</th>
               <th>STATUS</th>
-              <th>EXPIRY DATE</th>
+              <th>DESCRIPTION</th>
               <th>ACTIONS</th>
             </tr>
           </thead>
@@ -281,7 +280,7 @@ const ObatList = () => {
                     </span>
                   </td>
                   <td>
-                    <span className="date-text">{formatDate(obat.expiry_date)}</span>
+                    <span className="description-text">{obat.description?.substring(0, 50) || '-'}...</span>
                   </td>
                   <td>
                     <div className="action-buttons">
@@ -313,7 +312,7 @@ const ObatList = () => {
 
       <div className="pagination">
         <div className="pagination-info">
-          Showing <strong>{obatList.length}</strong> of <strong>250</strong> medicines
+          Showing <strong>{obatList.length}</strong> medicines
         </div>
 
         <div className="pagination-controls">
@@ -338,10 +337,6 @@ const ObatList = () => {
                 {pageNum}
               </button>
             ))}
-            <span className="pagination-dots">...</span>
-            <button className="page-number" onClick={() => setCurrentPage(25)}>
-              25
-            </button>
           </div>
           
           <button 

@@ -61,8 +61,29 @@
   padding: 20px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 16px;
   overflow-y: auto;
+}
+
+/* Menu Group */
+.menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 16px 4px;
+  margin-top: 8px;
+}
+
+.admin-sidebar.collapsed .menu-group-label {
+  display: none;
 }
 
 .menu-item {
@@ -404,7 +425,8 @@
   
   .admin-sidebar .logo-text,
   .admin-sidebar .menu-label,
-  .admin-sidebar .sidebar-credit {
+  .admin-sidebar .sidebar-credit,
+  .admin-sidebar .menu-group-label {
     display: none;
   }
   
