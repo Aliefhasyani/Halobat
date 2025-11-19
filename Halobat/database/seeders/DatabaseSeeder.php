@@ -15,5 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         // Seed roles first
         $this->call(RoleSeeder::class);
+
+        // Create a superadmin user after roles exist
+        $this->call(SuperAdminSeeder::class);
     }
 }
