@@ -53,15 +53,6 @@ export const userAPI = {
   delete: (id) => api.delete(`${API_PREFIX}/users/${id}`),
 };
 
-// ==================== ADMIN APIs ====================
-export const adminAPI = {
-  getAll: (params) => api.get(`${API_PREFIX}/admins`, { params }),
-  getById: (id) => api.get(`${API_PREFIX}/admins/${id}`),
-  create: (adminData) => api.post(`${API_PREFIX}/admins`, adminData),
-  update: (id, adminData) => api.put(`${API_PREFIX}/admins/${id}`, adminData),
-  delete: (id) => api.delete(`${API_PREFIX}/admins/${id}`),
-};
-
 // ==================== ROLES APIs ====================
 export const roleAPI = {
   getAll: (params) => api.get(`${API_PREFIX}/roles`, { params }),
