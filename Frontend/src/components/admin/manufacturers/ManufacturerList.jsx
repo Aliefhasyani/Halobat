@@ -8,6 +8,7 @@ const ManufacturerList = () => {
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedManufacturer, setSelectedManufacturer] = useState(null);
   const [formData, setFormData] = useState({
     id: null,
     name: '',
@@ -20,7 +21,10 @@ const ManufacturerList = () => {
   const fetchManufacturers = async () => {
     setLoading(true);
     try {
+      console.log('🔄 Fetching manufacturers...');
       const response = await manufacturerAPI.getAll();
+      console.log('✅ Response:', response.data);
+      
       if (response.data.success) {
         let fetchedManufacturers = response.data.data || [];
         
@@ -30,10 +34,21 @@ const ManufacturerList = () => {
           );
         }
         
+        console.log('✅ Manufacturers loaded:', fetchedManufacturers.length);
         setManufacturers(fetchedManufacturers);
       }
     } catch (error) {
-      console.error('Failed to fetch manufacturers:', error);
+      console.error('❌ Failed to fetch manufacturers:', error);
+      
+      let errorMsg = '⚠️ Failed to load manufacturers.\n\n';
+      if (error.code === 'ERR_NETWORK') {
+        errorMsg += '🔌 Network Error: Cannot connect to backend.\n';
+        errorMsg += '➡️ Make sure backend is running at: http://localhost:8000';
+      } else {
+        errorMsg += error.response?.data?.message || error.message;
+      }
+      alert(errorMsg);
+      
       setManufacturers([]);
     } finally {
       setLoading(false);
@@ -42,24 +57,54 @@ const ManufacturerList = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const trimmedName = formData.name.trim();
+    
+    if (!trimmedName) {
+      alert('❌ Manufacturer name cannot be empty');
+      return;
+    }
+    
+    console.log('📤 Submitting manufacturer:', formData);
+    
     try {
-      if (editMode) {
-        await manufacturerAPI.update(formData.id, { name: formData.name });
-        alert('Manufacturer updated successfully');
+      const payload = { name: trimmedName };
+      
+      if (editMode && formData.id) {
+        await manufacturerAPI.update(formData.id, payload);
+        alert('✅ Manufacturer updated successfully!');
       } else {
-        await manufacturerAPI.create({ name: formData.name });
-        alert('Manufacturer created successfully');
+        await manufacturerAPI.create(payload);
+        alert('✅ Manufacturer created successfully!');
       }
+      
       setShowModal(false);
       resetForm();
       fetchManufacturers();
     } catch (error) {
-      console.error('Failed to save manufacturer:', error);
-      alert('Failed to save manufacturer');
+      console.error('❌ Failed to save manufacturer:', error);
+      console.error('❌ Error response:', error.response?.data);
+      
+      let errorMessage = '❌ Failed to save manufacturer';
+      
+      if (error.response?.status === 422) {
+        const errors = error.response.data.errors;
+        if (errors?.name) {
+          errorMessage = `❌ Name: ${errors.name[0]}`;
+        } else if (error.response.data.message) {
+          errorMessage = `❌ ${error.response.data.message}`;
+        }
+      } else if (error.response?.data?.message) {
+        errorMessage = `❌ ${error.response.data.message}`;
+      }
+      
+      alert(errorMessage);
     }
   };
 
   const handleEdit = (manufacturer) => {
+    console.log('✏️ Editing manufacturer:', manufacturer);
+    
     setFormData({
       id: manufacturer.manufacturer_id,
       name: manufacturer.manufacturer_name,
@@ -69,25 +114,45 @@ const ManufacturerList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this manufacturer?')) {
+    const manufacturer = manufacturers.find(m => m.manufacturer_id === id);
+    
+    if (manufacturer && manufacturer.related_drugs && manufacturer.related_drugs.length > 0) {
+      alert(`❌ Cannot delete manufacturer "${manufacturer.manufacturer_name}"\n\n${manufacturer.related_drugs.length} drug(s) are still using this manufacturer.`);
+      return;
+    }
+    
+    if (window.confirm(`⚠️ Are you sure you want to delete "${manufacturer?.manufacturer_name}"?\n\nThis action cannot be undone.`)) {
       try {
         await manufacturerAPI.delete(id);
-        alert('Manufacturer deleted successfully');
+        alert('✅ Manufacturer deleted successfully!');
         fetchManufacturers();
       } catch (error) {
-        console.error('Failed to delete manufacturer:', error);
-        alert('Failed to delete manufacturer');
+        console.error('❌ Delete failed:', error);
+        alert(error.response?.data?.message || '❌ Failed to delete manufacturer');
       }
     }
   };
 
+  const handleView = (manufacturer) => {
+    console.log('👁️ Viewing manufacturer:', manufacturer);
+    setSelectedManufacturer(manufacturer);
+    setFormData({
+      id: manufacturer.manufacturer_id,
+      name: manufacturer.manufacturer_name,
+    });
+    setEditMode(false);
+    setShowModal(true);
+  };
+
   const resetForm = () => {
     setFormData({ id: null, name: '' });
+    setSelectedManufacturer(null);
     setEditMode(false);
   };
 
   const handleAddNew = () => {
     resetForm();
+    setEditMode(true);
     setShowModal(true);
   };
 
@@ -153,7 +218,7 @@ const ManufacturerList = () => {
                     </svg>
                   </div>
                   <p>No manufacturers found</p>
-                  <span>Try adjusting your search</span>
+                  <span>{searchTerm ? 'Try adjusting your search' : 'Click "Add New Manufacturer" to create your first manufacturer'}</span>
                 </td>
               </tr>
             ) : (
@@ -167,13 +232,36 @@ const ManufacturerList = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button className="action-btn edit" onClick={() => handleEdit(manufacturer)} title="Edit">
+                      <button 
+                        className="action-btn view" 
+                        onClick={() => handleView(manufacturer)} 
+                        title="View"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2"/>
+                          <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                      </button>
+                      <button 
+                        className="action-btn edit" 
+                        onClick={() => handleEdit(manufacturer)} 
+                        title="Edit"
+                      >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2"/>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2"/>
                         </svg>
                       </button>
-                      <button className="action-btn delete" onClick={() => handleDelete(manufacturer.manufacturer_id)} title="Delete">
+                      <button 
+                        className="action-btn delete" 
+                        onClick={() => handleDelete(manufacturer.manufacturer_id)} 
+                        title={manufacturer.related_drugs?.length > 0 ? `Cannot delete - ${manufacturer.related_drugs.length} drugs using this` : 'Delete'}
+                        disabled={manufacturer.related_drugs?.length > 0}
+                        style={{ 
+                          opacity: manufacturer.related_drugs?.length > 0 ? 0.5 : 1,
+                          cursor: manufacturer.related_drugs?.length > 0 ? 'not-allowed' : 'pointer'
+                        }}
+                      >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                           <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2"/>
                         </svg>
@@ -192,7 +280,9 @@ const ManufacturerList = () => {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editMode ? 'Edit Manufacturer' : 'Add New Manufacturer'}</h3>
+              <h3>
+                {editMode ? (formData.id ? 'Edit Manufacturer' : 'Add New Manufacturer') : 'View Manufacturer Details'}
+              </h3>
               <button className="modal-close" onClick={() => setShowModal(false)}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2"/>
@@ -208,17 +298,60 @@ const ManufacturerList = () => {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
+                  disabled={!editMode}
                   placeholder="Enter manufacturer name"
                 />
               </div>
 
+              {!editMode && selectedManufacturer && selectedManufacturer.related_drugs && (
+                <div className="form-group">
+                  <label>Related Drugs ({selectedManufacturer.related_drugs.length})</label>
+                  {selectedManufacturer.related_drugs.length > 0 ? (
+                    <div style={{ 
+                      maxHeight: '300px', 
+                      overflowY: 'auto', 
+                      border: '1px solid #e5e7eb', 
+                      borderRadius: '8px', 
+                      padding: '12px' 
+                    }}>
+                      {selectedManufacturer.related_drugs.map(drug => (
+                        <div 
+                          key={drug.drug_id} 
+                          style={{ 
+                            padding: '12px', 
+                            borderBottom: '1px solid #f3f4f6',
+                            fontSize: '14px'
+                          }}
+                        >
+                          <div style={{ fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
+                            {drug.generic_name}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                            {drug.description || 'No description'}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#2e7d32', fontWeight: '600', marginTop: '4px' }}>
+                            Rp {(drug.price || 0).toLocaleString('id-ID')}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ color: '#6b7280', fontSize: '14px', fontStyle: 'italic' }}>
+                      No drugs using this manufacturer
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="modal-footer">
                 <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
-                  Cancel
+                  {editMode ? 'Cancel' : 'Close'}
                 </button>
-                <button type="submit" className="btn-submit">
-                  {editMode ? 'Update' : 'Create'} Manufacturer
-                </button>
+                {editMode && (
+                  <button type="submit" className="btn-submit">
+                    {formData.id ? 'Update' : 'Create'} Manufacturer
+                  </button>
+                )}
               </div>
             </form>
           </div>
