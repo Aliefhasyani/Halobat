@@ -33,76 +33,32 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export type Drug = {
-  type: "generic" | "brand";
+export type ActiveIngredient = {
   id: string;
-  name: string;
-  description: string;
-  picture: string | null;
-  price: string;
-  manufacturer_data?: {
-    id: string;
-    name: string;
-  };
-  dosage_form_data?: {
-    id: string;
-    name: string;
-  };
-  drug_id?: string;
-  drug_data?: {
-    drug_id: string;
-    generic_name: string;
-    description: string;
-    price: string;
-    picture: string | null;
-  };
+  ingredient_name: string;
 };
 
-export const columns: ColumnDef<Drug>[] = [
+export const columns: ColumnDef<ActiveIngredient>[] = [
   {
-    accessorKey: "name",
+    accessorKey: "ingredient_name",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          Ingredient Name
           <ArrowUpDown />
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("name")}</div>,
-  },
-  {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => <div>{row.getValue("type")}</div>,
-  },
-  {
-    accessorKey: "price",
-    header: "Price",
-    cell: ({ row }) => <div>${row.getValue("price")}</div>,
-  },
-  {
-    id: "manufacturer",
-    header: "Manufacturer",
-    cell: ({ row }) => (
-      <div>{row.original.manufacturer_data?.name || "N/A"}</div>
-    ),
-  },
-  {
-    id: "dosageForm",
-    header: "Dosage Form",
-    cell: ({ row }) => (
-      <div>{row.original.dosage_form_data?.name || "N/A"}</div>
-    ),
+    cell: ({ row }) => <div>{row.getValue("ingredient_name")}</div>,
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const drug = row.original;
+      const ingredient = row.original;
 
       return (
         <DropdownMenu>
@@ -114,7 +70,7 @@ export const columns: ColumnDef<Drug>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <a href={`/dashboard/drugs/edit/${drug.id}`}>Edit</a>
+              <a href="#">Edit</a>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <a href="#">Delete</a>
@@ -126,8 +82,8 @@ export const columns: ColumnDef<Drug>[] = [
   },
 ];
 
-export function DrugsDatatable() {
-  const [data, setData] = React.useState<Drug[]>([]);
+export function ActiveIngredientsDatatable() {
+  const [data, setData] = React.useState<ActiveIngredient[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -137,22 +93,15 @@ export function DrugsDatatable() {
     React.useState<VisibilityState>({});
 
   React.useEffect(() => {
-    const fetchDrugs = async () => {
-      try {
-        const response = await fetch(
-          "https://halobat-production.up.railway.app/api/drugs"
-        );
-        const result = await response.json();
-        if (result.success) {
-          setData(result.data);
+    fetch("https://halobat-production.up.railway.app/api/active-ingredients")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success) {
+          setData(json.data);
         }
-      } catch (error) {
-        console.error("Failed to fetch drugs:", error);
-      } finally {
         setLoading(false);
-      }
-    };
-    fetchDrugs();
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const table = useReactTable({
@@ -183,10 +132,7 @@ export function DrugsDatatable() {
             <TableHeader>
               <TableRow>
                 <TableHead>
-                  <Skeleton className="h-4 w-20" />
-                </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-32" />
                 </TableHead>
                 <TableHead>
                   <Skeleton className="h-4 w-20" />
@@ -194,11 +140,8 @@ export function DrugsDatatable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {Array.from({ length: 3 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell>
-                    <Skeleton className="h-4 w-24" />
-                  </TableCell>
                   <TableCell>
                     <Skeleton className="h-4 w-32" />
                   </TableCell>
@@ -218,10 +161,15 @@ export function DrugsDatatable() {
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter names..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter ingredient names..."
+          value={
+            (table.getColumn("ingredient_name")?.getFilterValue() as string) ??
+            ""
+          }
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table
+              .getColumn("ingredient_name")
+              ?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />

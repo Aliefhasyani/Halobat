@@ -22,7 +22,16 @@ import {
   Heart,
 } from "lucide-react";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  activeMenu: string;
+  onMenuClick: (menu: string) => void;
+}
+
+export function AppSidebar({
+  activeMenu,
+  onMenuClick,
+  ...props
+}: AppSidebarProps) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>{/* disini nanti logo Halobat */}</SidebarHeader>
@@ -32,21 +41,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={true}>
-                  <a href="#">
+                <SidebarMenuButton asChild isActive={activeMenu === "users"}>
+                  <button onClick={() => onMenuClick("users")}>
                     <User className="w-4 h-4" />
                     Users
-                  </a>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={false}>
-                  <a href="#">
+                <SidebarMenuButton asChild isActive={activeMenu === "roles"}>
+                  <button onClick={() => onMenuClick("roles")}>
                     <Shield className="w-4 h-4" />
                     Roles
-                  </a>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -57,41 +66,50 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={false}>
-                  <a href="#">
+                <SidebarMenuButton asChild isActive={activeMenu === "drugs"}>
+                  <button onClick={() => onMenuClick("drugs")}>
                     <Pill className="w-4 h-4" />
                     Drugs
-                  </a>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={false}>
-                  <a href="#">
+                <SidebarMenuButton
+                  asChild
+                  isActive={activeMenu === "manufacturers"}
+                >
+                  <button onClick={() => onMenuClick("manufacturers")}>
                     <Building className="w-4 h-4" />
                     Manufacturers
-                  </a>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={false}>
-                  <a href="#">
+                <SidebarMenuButton
+                  asChild
+                  isActive={activeMenu === "dosage-forms"}
+                >
+                  <button onClick={() => onMenuClick("dosage-forms")}>
                     <Package className="w-4 h-4" />
                     Dosage Forms
-                  </a>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={false}>
-                  <a href="#">
+                <SidebarMenuButton
+                  asChild
+                  isActive={activeMenu === "active-ingredients"}
+                >
+                  <button onClick={() => onMenuClick("active-ingredients")}>
                     <TestTube className="w-4 h-4" />
                     Ingredients
-                  </a>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 interface User {
-  id: number;
+  id: string;
   full_name: string;
   username: string;
   email: string;
