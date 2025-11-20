@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up(): void {
         Schema::create('drugs', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid()'));
+            $table->uuid('id')->primary();
             $table->string('generic_name');
             $table->text('description')->nullable();
             $table->text('picture')->nullable();

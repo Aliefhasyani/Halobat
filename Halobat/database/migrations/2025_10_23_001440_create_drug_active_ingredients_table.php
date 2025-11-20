@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up(): void {
         Schema::create('drug_active_ingredients', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid()'));
+            $table->uuid('id')->primary();
             $table->uuid('drug_id');
             $table->foreign('drug_id')->references('id')->on('drugs')->onDelete('cascade');
             $table->uuid('active_ingredient_id');

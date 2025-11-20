@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Brand extends Model
 {
+    use HasUuids;
+
     protected $table = 'brands';
     protected $fillable = ['name','picture','drug_id', 'price'];
     protected $keyType = 'string';

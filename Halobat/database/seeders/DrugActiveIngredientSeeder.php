@@ -64,7 +64,7 @@ class DrugActiveIngredientSeeder extends Seeder
             if ($item['drug_id'] && $item['active_ingredient_id']) {
                 DB::table('drug_active_ingredients')->updateOrInsert(
                     ['drug_id' => $item['drug_id'], 'active_ingredient_id' => $item['active_ingredient_id']],
-                    $item
+                    array_merge($item, ['id' => \Illuminate\Support\Str::uuid()])
                 );
             }
         }

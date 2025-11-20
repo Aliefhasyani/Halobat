@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Drug;
 use App\Models\RecomendedDrug;
 
 class Diagnosis extends Model
 {
+    use HasUuids;
+
     protected $table = 'diagnoses';
     protected $fillable = ['user_id','symptoms','diagnosis'];
     protected $keyType = 'string';
