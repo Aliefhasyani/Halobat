@@ -10,9 +10,9 @@ class CheckRole
 {
     /**
      * Handle an incoming request.
-     * Accepts roles as a comma-separated list: role:admin,superadmin
+     * Accepts a single role: role:admin
      */
-    public function handle(Request $request, Closure $next, $roles = null)
+    public function handle(Request $request, Closure $next, $role = null)
     {
         $user = JWTAuth::user();
 
@@ -26,32 +26,28 @@ class CheckRole
         // Load the role relationship if not already loaded
         $user->load('role');
 
-        // If no roles were provided, block by default
-        if (!$roles) {
+        // If no role was provided, block by default
+        if (!$role) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized. No role specified.'
             ], 403);
         }
 
-    // Accept both pipe and comma separators
-    $roles = explode(',', $roles);        // Normalize roles
-        $roles = array_map('trim', $roles);
-
         $roleName = null;
         if ($user->relationLoaded('role') || method_exists($user, 'role')) {
-            $role = $user->role;
-            $roleName = $role ? $role->name : null;
+            $userRole = $user->role;
+            $roleName = $userRole ? $userRole->name : null;
         }
 
-        // If role id or name matches one of the allowed roles, continue
-        if (in_array((string)$user->role_id, $roles, true) || ($roleName && in_array($roleName, $roles, true))) {
+        // If role id or name matches the allowed role, continue
+        if ((string)$user->role_id === $role || ($roleName && $roleName === $role)) {
             return $next($request);
         }
 
         return response()->json([
             'success' => false,
-            'message' => 'Unauthorized. Role: ' . ($roleName ?: 'none') . ' Allowed: ' . implode(',', $roles),
+            'message' => 'Unauthorized. Role: ' . ($roleName ?: 'none') . ' Allowed: ' . $role,
         ], 403);
     }
 }

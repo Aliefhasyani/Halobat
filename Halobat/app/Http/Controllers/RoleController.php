@@ -9,7 +9,8 @@ class RoleController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:sanctum')->only(['store','update','destroy']);
+        $this->middleware('jwt.auth')->only(['store','update','destroy']);
+        $this->middleware('role:admin')->only(['store','update','destroy']);
         $this->middleware('role:superadmin')->only(['store','update','destroy']);
     }
     public function index(){
