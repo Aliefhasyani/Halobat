@@ -33,10 +33,8 @@ class CheckRole
             ], 403);
         }
 
-        // Accept both pipe and comma separators
-        $roles = preg_split('/[|,]/', $roles);
-
-        // Normalize roles
+    // Accept both pipe and comma separators
+    $roles = explode(',', $roles);        // Normalize roles
         $roles = array_map('trim', $roles);
 
         $roleName = null;
@@ -52,7 +50,7 @@ class CheckRole
 
         return response()->json([
             'success' => false,
-            'message' => 'Unauthorized. Insufficient role privileges. Current role: ' . ($roleName ?: 'none'),
+            'message' => 'Unauthorized. Role: ' . ($roleName ?: 'none') . ' Allowed: ' . implode(',', $roles),
         ], 403);
     }
 }
