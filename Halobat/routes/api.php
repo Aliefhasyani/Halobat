@@ -20,14 +20,15 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 // Auth endpoints - CSRF-exempt on backend
 Route::post('/register',[AuthController::class,'register'])->name('register');
 Route::post('/login',[AuthController::class,'login'])->name('login');
-Route::post('/logout',[AuthController::class,'logout'])->name('logout')->middleware('auth:sanctum');
+Route::post('/logout',[AuthController::class,'logout'])->middleware('jwt.auth')->name('logout');
 
 Route::post('/chat', [ChatController::class, 'index'])->name('chat');
 
-Route::apiResource('roles', RoleController::class);
-Route::apiResource('users', UserController::class);
-Route::apiResource('manufacturers', ManufacturerController::class);
-Route::apiResource('dosage-forms', DosageFormController::class);
-Route::apiResource('drugs', DrugController::class);
-
-Route::apiResource('active-ingredients', ActiveIngredientController::class);
+Route::middleware('jwt.auth')->group(function () {
+    Route::apiResource('roles', RoleController::class);
+    Route::apiResource('users', UserController::class);
+    Route::apiResource('manufacturers', ManufacturerController::class);
+    Route::apiResource('dosage-forms', DosageFormController::class);
+    Route::apiResource('drugs', DrugController::class);
+    Route::apiResource('active-ingredients', ActiveIngredientController::class);
+});

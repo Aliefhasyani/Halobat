@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CheckRole
 {
@@ -13,7 +14,7 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, $roles = null)
     {
-        $user = $request->user();
+        $user = JWTAuth::user();
 
         if (!$user) {
             return response()->json([

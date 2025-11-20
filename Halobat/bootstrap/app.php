@@ -16,13 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            // Removed Sanctum middleware
         ]);
 
-        // Exclude API routes from CSRF verification (they use Sanctum token-based auth)
+        // Exclude API routes from CSRF verification (they use JWT token-based auth)
         $middleware->validateCsrfTokens(except: [
             'api/*',
-            'sanctum/*',
         ]);
 
         $middleware->alias([

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
-use Laravel\Sanctum\HasApiTokens; 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Redis;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 
 
@@ -41,34 +41,45 @@ class AuthController extends Controller
     }
 
     public function login(Request $request){
-        if(Auth::attempt(['email' => $request->email , 'password' => $request->password])){
-            $user = Auth::user();
-            $token = $user->createToken('auth_token')->plainTextToken;
+        $credentials = $request->only('email', 'password');
 
-            return response()->json(
-                [
-                    "success" => true,
-                    "message" => "login successful",
-                    "token" => $token,
-                    "user_id" => $user->id
-                ]);
-        }else{
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => "Invalid email or password"
+        try {
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid email or password'
                 ], 401);
+            }
+        } catch (JWTException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not create token'
+            ], 500);
         }
-    }
 
-   public function logout(Request $request){
-        $user = $request->user(); 
-       
-        $user->currentAccessToken()->delete();
+        $user = Auth::user();
 
         return response()->json([
             'success' => true,
-            'message' => 'User logged out!'
+            'message' => 'Login successful',
+            'token' => $token,
+            'user_id' => $user->id
         ]);
+    }
+
+   public function logout(Request $request){
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User logged out!'
+            ]);
+        } catch (JWTException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to logout'
+            ], 500);
+        }
     }
 }
