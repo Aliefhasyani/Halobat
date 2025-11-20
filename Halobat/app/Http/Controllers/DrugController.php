@@ -12,7 +12,7 @@ class DrugController extends Controller
     public function __construct()
     {
         // require an auth token for write actions and restrict by role
-        $this->middleware('auth:sanctum')->only(['store', 'update', 'destroy']);
+        $this->middleware('jwt.auth')->only(['store', 'update', 'destroy']);
         $this->middleware('role:admin,superadmin')->only(['store', 'update', 'destroy']);
     }
     public function index()

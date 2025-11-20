@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
@@ -100,7 +101,7 @@ class UserController extends Controller
         $data['password'] = Hash::make($data['password']);
 
         // Only superadmin may change role_id
-        if (array_key_exists('role_id', $data) && Auth::user()->role->name !== 'superadmin') {
+        if (array_key_exists('role_id', $data) && JWTAuth::user()->role->name !== 'superadmin') {
             return response()->json([
                 'success' => false,
                 'error' => 'Only superadmin can change user roles.'
