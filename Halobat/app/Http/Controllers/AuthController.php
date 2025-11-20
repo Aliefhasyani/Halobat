@@ -50,7 +50,7 @@ class AuthController extends Controller
                     "success" => true,
                     "message" => "login successful",
                     "token" => $token,
-                    "user" => $user
+                    "user_id" => $user->id
                 ]);
         }else{
             return response()->json(

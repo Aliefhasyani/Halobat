@@ -37,7 +37,7 @@ class UserController extends Controller
 
     public function show($id){
         try{
-            $user = User::findOrFail($id);
+            $user = User::with('role')->findOrFail($id);
         
             $user_data = [
                 'full_name' => $user->full_name,
