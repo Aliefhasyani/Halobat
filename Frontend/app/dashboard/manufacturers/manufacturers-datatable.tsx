@@ -16,6 +16,7 @@ import {
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,13 +35,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 export type Manufacturer = {
-  manufacturer_id: string;
-  manufacturer_name: string;
+  id: string;
+  name: string;
 };
 
 export const columns: ColumnDef<Manufacturer>[] = [
   {
-    accessorKey: "manufacturer_name",
+    accessorKey: "name",
     header: ({ column }) => {
       return (
         <Button
@@ -52,7 +53,7 @@ export const columns: ColumnDef<Manufacturer>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("manufacturer_name")}</div>,
+    cell: ({ row }) => <div>{row.getValue("name")}</div>,
   },
   {
     id: "actions",
@@ -70,10 +71,22 @@ export const columns: ColumnDef<Manufacturer>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <a href="#">Edit</a>
+              <Link
+                href={`/dashboard/manufacturers/edit?id=${manufacturer.id}`}
+              >
+                Edit
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href="#">Delete</a>
+            <DropdownMenuItem
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("open-delete-manufacturer", {
+                    detail: manufacturer,
+                  })
+                )
+              }
+            >
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -99,8 +112,14 @@ export function ManufacturersDatatable() {
           "https://halobat-production.up.railway.app/api/manufacturers"
         );
         const result = await response.json();
-        if (result.success) {
-          setData(result.data);
+        if (result.success && Array.isArray(result.data)) {
+          // normalize to {id,name}
+          setData(
+            result.data.map((m: any) => ({
+              id: String(m.manufacturer_id ?? m.id ?? ""),
+              name: String(m.manufacturer_name ?? m.name ?? ""),
+            }))
+          );
         }
       } catch (error) {
         console.error("Failed to fetch manufacturers:", error);
@@ -111,6 +130,93 @@ export function ManufacturersDatatable() {
 
     fetchData();
   }, []);
+
+  // Delete dialog state and selected manufacturer
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [selectedManufacturer, setSelectedManufacturer] =
+    React.useState<Manufacturer | null>(null);
+  const [deleting, setDeleting] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState("");
+
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as Manufacturer;
+      if (detail && detail.id) {
+        setSelectedManufacturer(detail);
+        setDeleteError("");
+        setDeleteDialogOpen(true);
+      }
+    };
+
+    window.addEventListener(
+      "open-delete-manufacturer",
+      handler as EventListener
+    );
+    return () =>
+      window.removeEventListener(
+        "open-delete-manufacturer",
+        handler as EventListener
+      );
+  }, []);
+
+  const handleDelete = async (id?: string) => {
+    if (!id) return setDeleteError("Missing manufacturer id");
+
+    setDeleting(true);
+    setDeleteError("");
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setDeleteError("Not authenticated. Please login.");
+        setDeleting(false);
+        return;
+      }
+
+      const response = await fetch(
+        `https://halobat-production.up.railway.app/api/manufacturers/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        setDeleteError("Unauthorized. Please login again.");
+        setDeleting(false);
+        return;
+      }
+
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const resultObj = (await response.json()) as Record<string, unknown>;
+        if (response.ok && resultObj && resultObj.success === true) {
+          setData((prev) => prev.filter((m) => m.id !== id));
+          setDeleteDialogOpen(false);
+          setSelectedManufacturer(null);
+        } else {
+          console.error("Error deleting manufacturer:", resultObj);
+          const errMsg =
+            typeof resultObj.error === "string"
+              ? resultObj.error
+              : "Failed to delete manufacturer";
+          setDeleteError(errMsg);
+        }
+      } else {
+        const text = await response.text();
+        console.error("Non-JSON response:", text);
+        setDeleteError(`Delete failed: ${text.slice(0, 200)}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setDeleteError("An error occurred");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const table = useReactTable({
     data,
@@ -167,21 +273,20 @@ export function ManufacturersDatatable() {
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Filter manufacturer names..."
-          value={
-            (table
-              .getColumn("manufacturer_name")
-              ?.getFilterValue() as string) ?? ""
-          }
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table
-              .getColumn("manufacturer_name")
-              ?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
+        <Button asChild>
+          <Link href="/dashboard/manufacturers/create">
+            Create Manufacturer
+          </Link>
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -253,6 +358,38 @@ export function ManufacturersDatatable() {
           </Button>
         </div>
       </div>
+      {/* Delete dialog */}
+      {deleteDialogOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white rounded p-6 shadow-lg w-full max-w-md">
+            <h3 className="text-lg font-medium">Delete manufacturer</h3>
+            <p className="mt-2 text-sm">
+              Are you sure you want to delete{" "}
+              {selectedManufacturer?.name ?? "this manufacturer"}? This action
+              cannot be undone.
+            </p>
+            {deleteError && <p className="text-red-500 mt-2">{deleteError}</p>}
+            <div className="mt-4 flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteDialogOpen(false);
+                  setSelectedManufacturer(null);
+                  setDeleteError("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => handleDelete(selectedManufacturer?.id)}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
