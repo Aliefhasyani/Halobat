@@ -14,6 +14,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -97,6 +98,7 @@ export function RolesDatatable() {
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   React.useEffect(() => {
     fetch("https://halobat-production.up.railway.app/api/roles")
@@ -120,10 +122,18 @@ export function RolesDatatable() {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: "includesString",
     state: {
       sorting,
       columnFilters,
       columnVisibility,
+      globalFilter,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
     },
   });
 
@@ -171,15 +181,16 @@ export function RolesDatatable() {
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
-          placeholder="Filter names..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search all columns..."
+          value={globalFilter ?? ""}
+          onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
+        <Button asChild>
+          <Link href="/dashboard/roles/create">Create Role</Link>
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
