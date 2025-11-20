@@ -18,7 +18,7 @@ class DrugController extends Controller
     public function index()
     {
         $drugs = Drug::with(['manufacturer', 'dosageForm'])->get();
-        $brands = Brand::with('drug')->get();
+        $brands = Brand::with('drug.manufacturer', 'drug.dosageForm')->get();
 
         $formattedDrugs = $drugs->map(function ($drug) {
             return [
@@ -48,6 +48,14 @@ class DrugController extends Controller
                 'picture' => $brand->picture,
                 'price' => $brand->price,
                 'drug_id' => $brand->drug_id,
+                'manufacturer_data' => $brand->drug ? [
+                    'id' => $brand->drug->manufacturer->id,
+                    'name' => $brand->drug->manufacturer->name
+                ] : null,
+                'dosage_form_data' => $brand->drug ? [
+                    'id' => $brand->drug->dosageForm->id,
+                    'name' => $brand->drug->dosageForm->name,
+                ] : null,
                 'drug_data' => $brand->drug ? [
                     'drug_id' => $brand->drug->id,
                     'generic_name' => $brand->drug->generic_name,
