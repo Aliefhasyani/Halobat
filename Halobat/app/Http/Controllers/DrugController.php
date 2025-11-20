@@ -6,6 +6,8 @@ use App\Models\Drug;
 use App\Models\Brand;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class DrugController extends Controller
 {
@@ -117,23 +119,59 @@ class DrugController extends Controller
             'manufacturer_id' => 'required|exists:manufacturers,id',
             'dosage_form_id' => 'required|exists:dosage_forms,id',
 
-        
-            'active_ingredient_ids' => 'nullable|array',
-            'active_ingredient_ids.*' => 'exists:active_ingredients,id',
+            // accept detailed active ingredient objects with pivot data
+            'active_ingredients' => 'nullable|array',
+            'active_ingredients.*.id' => 'required_with:active_ingredients|exists:active_ingredients,id',
+            'active_ingredients.*.quantity' => 'required_with:active_ingredients|integer|min:0',
+
+            // accept brand objects to create for this drug
+            'brands' => 'nullable|array',
+            'brands.*.id' => 'nullable|uuid',
+            'brands.*.name' => 'required_with:brands|string|max:255',
+            'brands.*.picture' => 'nullable|string',
+            'brands.*.price' => 'nullable|numeric',
         ]);
 
-        
-        $drug = Drug::create($validated);
+        // create drug and related records inside a transaction
+        $created = DB::transaction(function () use ($validated, $request) {
+            // remove nested payloads before creating model
+            $drugData = collect($validated)->except(['active_ingredients', 'brands'])->toArray();
 
-    
-        if ($request->filled('active_ingredient_ids')) {
-            $drug->activeIngredients()->sync($request->active_ingredient_ids);
-        }
+            $drug = Drug::create($drugData);
+
+            // attach active ingredients with pivot quantity
+            if ($request->has('active_ingredients')) {
+                $sync = [];
+                foreach ($request->input('active_ingredients', []) as $ai) {
+                    $sync[$ai['id']] = ['quantity' => isset($ai['quantity']) ? (int)$ai['quantity'] : 0];
+                }
+                $drug->activeIngredients()->sync($sync);
+            }
+
+            // create brands if provided
+            if ($request->has('brands')) {
+                foreach ($request->input('brands', []) as $b) {
+                    $brandData = [
+                        'id' => $b['id'] ?? (string) Str::uuid(),
+                        'name' => $b['name'] ?? null,
+                        'picture' => $b['picture'] ?? null,
+                        'price' => $b['price'] ?? null,
+                        'drug_id' => $drug->id,
+                    ];
+                    // create only when name present
+                    if (!empty($brandData['name'])) {
+                        Brand::create($brandData);
+                    }
+                }
+            }
+
+            return $drug->load(['activeIngredients', 'brand', 'manufacturer', 'dosageForm']);
+        });
 
         return response()->json([
             'success' => true,
             'message' => 'Drug created successfully.',
-            'data' => $drug->load(['activeIngredients'])
+            'data' => $created
         ], 201);
     }
 
@@ -147,25 +185,71 @@ class DrugController extends Controller
             'manufacturer_id' => 'sometimes|required|exists:manufacturers,id',
             'dosage_form_id' => 'sometimes|required|exists:dosage_forms,id',
 
-            
-            'active_ingredient_ids' => 'nullable|array',
-            'active_ingredient_ids.*' => 'exists:active_ingredients,id',
+            'active_ingredients' => 'nullable|array',
+            'active_ingredients.*.id' => 'required_with:active_ingredients|exists:active_ingredients,id',
+            'active_ingredients.*.quantity' => 'required_with:active_ingredients|integer|min:0',
+
+            'brands' => 'nullable|array',
+            'brands.*.id' => 'nullable|uuid',
+            'brands.*.name' => 'required_with:brands|string|max:255',
+            'brands.*.picture' => 'nullable|string',
+            'brands.*.price' => 'nullable|numeric',
         ]);
 
         $drug = Drug::findOrFail($id);
 
-        
-        $drug->update($validated);
+        $updated = DB::transaction(function () use ($drug, $validated, $request) {
+            // update scalar fields only
+            $drugData = collect($validated)->except(['active_ingredients', 'brands'])->toArray();
+            if (!empty($drugData)) {
+                $drug->update($drugData);
+            }
 
-    
-        if ($request->filled('active_ingredient_ids')) {
-            $drug->activeIngredients()->sync($request->active_ingredient_ids);
-        }
+            // sync active ingredients (replace existing pivot rows)
+            if ($request->has('active_ingredients')) {
+                $sync = [];
+                foreach ($request->input('active_ingredients', []) as $ai) {
+                    $sync[$ai['id']] = ['quantity' => isset($ai['quantity']) ? (int)$ai['quantity'] : 0];
+                }
+                $drug->activeIngredients()->sync($sync);
+            }
+
+            // handle brands: update existing or create new
+            if ($request->has('brands')) {
+                foreach ($request->input('brands', []) as $b) {
+                    if (!empty($b['id'])) {
+                        $brand = Brand::where('id', $b['id'])->where('drug_id', $drug->id)->first();
+                        if ($brand) {
+                            $brand->update([
+                                'name' => $b['name'] ?? $brand->name,
+                                'picture' => $b['picture'] ?? $brand->picture,
+                                'price' => $b['price'] ?? $brand->price,
+                            ]);
+                            continue;
+                        }
+                    }
+
+                    // create new brand if name provided
+                    $brandData = [
+                        'id' => $b['id'] ?? (string) Str::uuid(),
+                        'name' => $b['name'] ?? null,
+                        'picture' => $b['picture'] ?? null,
+                        'price' => $b['price'] ?? null,
+                        'drug_id' => $drug->id,
+                    ];
+                    if (!empty($brandData['name'])) {
+                        Brand::create($brandData);
+                    }
+                }
+            }
+
+            return $drug->load(['activeIngredients', 'brand', 'manufacturer', 'dosageForm']);
+        });
 
         return response()->json([
             'success' => true,
             'message' => 'Drug updated successfully.',
-            'data' => $drug->load(['activeIngredients'])
+            'data' => $updated
         ]);
     }
 

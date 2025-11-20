@@ -94,12 +94,13 @@ class UserController extends Controller
                 'full_name' => 'required|string|max:255',
                 'username' => 'required|string|max:255',
                 'email'=> 'required|email',
-                'password' => 'required|string|min:8',
+                'password' => 'sometimes|string|min:8',
                 'role_id' => 'sometimes|exists:roles,id'
             ]);
 
-        $data['password'] = Hash::make($data['password']);
-
+        if (array_key_exists('password', $data)) {
+            $data['password'] = Hash::make($data['password']);
+        }
         // Only superadmin may change role_id
         if (array_key_exists('role_id', $data) && JWTAuth::user()->role->name !== 'superadmin') {
             return response()->json([
