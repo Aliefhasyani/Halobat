@@ -21,6 +21,7 @@ class UserController extends Controller
 
         $formatted = $users->map(function($user){
             return [
+                'id' => $user->id,
                 'full_name' => $user->full_name,
                 'username' => $user->username,
                 'email' => $user->email,

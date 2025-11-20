@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ActiveIngredientController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BrandController;
 use App\Http\Controllers\DosageFormController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\ManufacturerController;
@@ -30,5 +29,5 @@ Route::apiResource('users', UserController::class);
 Route::apiResource('manufacturers', ManufacturerController::class);
 Route::apiResource('dosage-forms', DosageFormController::class);
 Route::apiResource('drugs', DrugController::class);
-Route::apiResource('brands', BrandController::class);
+
 Route::apiResource('active-ingredients', ActiveIngredientController::class);

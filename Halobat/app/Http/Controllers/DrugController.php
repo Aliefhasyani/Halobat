@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Drug;
+use App\Models\Brand;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
@@ -17,11 +18,13 @@ class DrugController extends Controller
     public function index()
     {
         $drugs = Drug::with(['manufacturer', 'dosageForm'])->get();
+        $brands = Brand::with('drug')->get();
 
-        $formatted = $drugs->map(function ($drug) {
+        $formattedDrugs = $drugs->map(function ($drug) {
             return [
-                'drug_id' => $drug->id,
-                'generic_name' => $drug->generic_name,
+                'type' => 'generic',
+                'id' => $drug->id,
+                'name' => $drug->generic_name,
                 'description' => $drug->description,
                 'picture' => $drug->picture,
                 'price' => $drug->price,
@@ -34,11 +37,32 @@ class DrugController extends Controller
                     'name' => $drug->dosageForm->name,
                 ],
             ];
-        })->values();
+        });
+
+        $formattedBrands = $brands->map(function ($brand) {
+            return [
+                'type' => 'brand',
+                'id' => $brand->id,
+                'name' => $brand->name,
+                'description' => $brand->drug ? $brand->drug->description : null,
+                'picture' => $brand->picture,
+                'price' => $brand->price,
+                'drug_id' => $brand->drug_id,
+                'drug_data' => $brand->drug ? [
+                    'drug_id' => $brand->drug->id,
+                    'generic_name' => $brand->drug->generic_name,
+                    'description' => $brand->drug->description,
+                    'price' => $brand->drug->price,
+                    'picture' => $brand->drug->picture,
+                ] : null,
+            ];
+        });
+
+        $all = $formattedDrugs->concat($formattedBrands)->values();
 
         return response()->json([
             'success' => true,
-            'data' => $formatted
+            'data' => $all
         ]);
     }
 
