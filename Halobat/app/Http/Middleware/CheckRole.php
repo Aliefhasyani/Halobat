@@ -10,7 +10,7 @@ class CheckRole
 {
     /**
      * Handle an incoming request.
-     * Accepts a single role: role:admin
+     * Accepts multiple roles separated by commas: role:admin,superadmin
      */
     public function handle(Request $request, Closure $next, $role = null)
     {
@@ -34,20 +34,25 @@ class CheckRole
             ], 403);
         }
 
+        $allowedRoles = explode(',', $role);
+
         $roleName = null;
         if ($user->relationLoaded('role') || method_exists($user, 'role')) {
             $userRole = $user->role;
             $roleName = $userRole ? $userRole->name : null;
         }
 
-        // If role id or name matches the allowed role, continue
-        if ((string)$user->role_id === $role || ($roleName && $roleName === $role)) {
-            return $next($request);
+        // Check if user's role id or name matches any allowed role
+        foreach ($allowedRoles as $allowedRole) {
+            $allowedRole = trim($allowedRole);
+            if ((string)$user->role_id === $allowedRole || ($roleName && $roleName === $allowedRole)) {
+                return $next($request);
+            }
         }
 
         return response()->json([
             'success' => false,
-            'message' => 'Unauthorized. Role: ' . ($roleName ?: 'none') . ' Allowed: ' . $role,
+            'message' => 'Unauthorized. Role: ' . ($roleName ?: 'none') . ' Allowed: ' . implode(', ', $allowedRoles),
         ], 403);
     }
 }
