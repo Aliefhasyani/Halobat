@@ -22,6 +22,9 @@ class CheckRole
             ], 401);
         }
 
+        // Load the role relationship if not already loaded
+        $user->load('role');
+
         // If no roles were provided, block by default
         if (!$roles) {
             return response()->json([
@@ -49,7 +52,7 @@ class CheckRole
 
         return response()->json([
             'success' => false,
-            'message' => 'Unauthorized. Insufficient role privileges.'
+            'message' => 'Unauthorized. Insufficient role privileges. Current role: ' . ($roleName ?: 'none'),
         ], 403);
     }
 }
