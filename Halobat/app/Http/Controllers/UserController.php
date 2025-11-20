@@ -24,7 +24,6 @@ class UserController extends Controller
                 'full_name' => $user->full_name,
                 'username' => $user->username,
                 'email' => $user->email,
-                'role_id' => $user->role_id,
                 'role' => $user->role->name,
             ];
         })->values();
@@ -43,7 +42,6 @@ class UserController extends Controller
                 'full_name' => $user->full_name,
                 'username' => $user->username,
                 'email' => $user->email,
-                'role_id' => $user->role_id,
                 'role' => $user->role->name
             ];
             

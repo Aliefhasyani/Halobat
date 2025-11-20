@@ -1,8 +1,21 @@
+"use client";
+
 import { AppSidebar } from "@/app/dashboard/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardNavbar } from "@/components/custom/dashboard-navbar";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const userId = localStorage.getItem("user_id");
+    if (!userId) {
+      router.push("/auth/login");
+    }
+  }, [router]);
+
   return (
     <SidebarProvider>
       <AppSidebar />
