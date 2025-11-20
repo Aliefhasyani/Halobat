@@ -10,6 +10,8 @@ class Diagnosis extends Model
 {
     protected $table = 'diagnoses';
     protected $fillable = ['user_id','symptoms','diagnosis'];
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     public function user(){
         return $this->belongsTo(User::class);

@@ -14,5 +14,6 @@ class RecomendedDrug extends Pivot
         'quantity',
     ];
 
-    public $incrementing = true;
+    protected $keyType = 'string';
+    public $incrementing = false;
 }

@@ -12,9 +12,11 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::create('recomended_drugs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('diagnosis_id')->constrained('diagnoses')->onDelete('cascade');
-            $table->foreignId('drug_id')->constrained('drugs')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('diagnosis_id');
+            $table->foreign('diagnosis_id')->references('id')->on('diagnoses')->onDelete('cascade');
+            $table->uuid('drug_id');
+            $table->foreign('drug_id')->references('id')->on('drugs')->onDelete('cascade');
             $table->unsignedInteger('quantity')->default(1);
             $table->timestamps();
 

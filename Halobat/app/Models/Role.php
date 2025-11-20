@@ -8,6 +8,8 @@ class Role extends Model
 {
     protected $table = 'roles';
     protected $fillable = ['name','description'];
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     public function users(){
         return $this->hasMany(User::class);

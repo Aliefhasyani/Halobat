@@ -10,6 +10,8 @@ class Drug extends Model
 {
     protected $table = 'drugs';
     protected $fillable = ['generic_name','description','picture','price','manufacturer_id','dosage_form_id'];
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     public function manufacturer(){
         return $this->belongsTo(Manufacturer::class);

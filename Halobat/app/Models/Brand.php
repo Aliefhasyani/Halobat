@@ -8,6 +8,8 @@ class Brand extends Model
 {
     protected $table = 'brands';
     protected $fillable = ['name','picture','drug_id', 'price'];
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     public function drug(){
         return $this->belongsTo(Drug::class);

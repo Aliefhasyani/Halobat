@@ -7,12 +7,13 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('full_name');
             $table->string('username')->unique();
             $table->string('email')->unique();
             $table->string('password');
-            $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
+            $table->uuid('role_id');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->timestamps();
         });
     }

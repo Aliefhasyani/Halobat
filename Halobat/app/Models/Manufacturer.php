@@ -8,6 +8,8 @@ class Manufacturer extends Model
 {
     protected $table = 'manufacturers';
     protected $fillable = ['name'];
+    protected $keyType = 'string';
+    public $incrementing = false;
 
 
     public function drugs(){

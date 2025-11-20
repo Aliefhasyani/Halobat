@@ -7,9 +7,11 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void {
         Schema::create('drug_active_ingredients', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('drug_id')->constrained('drugs')->onDelete('cascade');
-            $table->foreignId('active_ingredient_id')->constrained('active_ingredients')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('drug_id');
+            $table->foreign('drug_id')->references('id')->on('drugs')->onDelete('cascade');
+            $table->uuid('active_ingredient_id');
+            $table->foreign('active_ingredient_id')->references('id')->on('active_ingredients')->onDelete('cascade');
             $table->integer('quantity');
             $table->timestamps();
         });
