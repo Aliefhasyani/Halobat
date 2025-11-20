@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Diagnosis;
+use App\Models\RecomendedDrug;
 
 class Drug extends Model
 {
@@ -23,5 +25,16 @@ class Drug extends Model
     
     public function activeIngredients(){
         return $this->belongsToMany(ActiveIngredient::class, 'drug_active_ingredients');
+    }
+
+    /**
+     * The diagnoses that this drug is recommended for.
+     */
+    public function recommendedDiagnoses()
+    {
+        return $this->belongsToMany(Diagnosis::class, 'recomended_drugs')
+                    ->using(RecomendedDrug::class)
+                    ->withPivot('quantity')
+                    ->withTimestamps();
     }
 }
