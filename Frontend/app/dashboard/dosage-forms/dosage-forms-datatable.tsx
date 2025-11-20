@@ -110,10 +110,13 @@ export function DosageFormsDatatable() {
         const result = await response.json();
         if (result.success && Array.isArray(result.data)) {
           setData(
-            result.data.map((d: any) => ({
-              id: String(d.dosage_id ?? d.id ?? ""),
-              name: String(d.dosage_name ?? d.name ?? ""),
-            }))
+            result.data.map((d: unknown) => {
+              const rec = d as Record<string, unknown>;
+              return {
+                id: String(rec.dosage_id ?? rec.id ?? ""),
+                name: String(rec.dosage_name ?? rec.name ?? ""),
+              } as { id: string; name: string };
+            })
           );
         }
       } catch (error) {

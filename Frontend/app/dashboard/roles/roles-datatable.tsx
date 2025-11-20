@@ -77,10 +77,18 @@ export const columns: ColumnDef<Role>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <a href="#">Edit</a>
+              <Link href={`/dashboard/roles/edit?id=${role.role_id}`}>
+                Edit
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href="#">Delete</a>
+            <DropdownMenuItem
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("open-delete-role", { detail: role })
+                )
+              }
+            >
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

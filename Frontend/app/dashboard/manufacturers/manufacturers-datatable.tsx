@@ -115,10 +115,13 @@ export function ManufacturersDatatable() {
         if (result.success && Array.isArray(result.data)) {
           // normalize to {id,name}
           setData(
-            result.data.map((m: any) => ({
-              id: String(m.manufacturer_id ?? m.id ?? ""),
-              name: String(m.manufacturer_name ?? m.name ?? ""),
-            }))
+            result.data.map((m: unknown) => {
+              const rec = m as Record<string, unknown>;
+              return {
+                id: String(rec.manufacturer_id ?? rec.id ?? ""),
+                name: String(rec.manufacturer_name ?? rec.name ?? ""),
+              } as { id: string; name: string };
+            })
           );
         }
       } catch (error) {

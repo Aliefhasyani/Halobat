@@ -115,10 +115,13 @@ export function ActiveIngredientsDatatable() {
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
           setData(
-            json.data.map((i: any) => ({
-              id: String(i.id ?? i.ingredient_id ?? ""),
-              name: String(i.ingredient_name ?? i.name ?? ""),
-            }))
+            json.data.map((i: unknown) => {
+              const rec = i as Record<string, unknown>;
+              return {
+                id: String(rec.id ?? rec.ingredient_id ?? ""),
+                name: String(rec.ingredient_name ?? rec.name ?? ""),
+              } as typeof rec & { id: string; name: string };
+            })
           );
         }
       } catch (err) {
