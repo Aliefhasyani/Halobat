@@ -105,7 +105,11 @@ class DrugController extends Controller
             if (!empty($data['active_ingredients'])) {
                 $attach = [];
                 foreach ($data['active_ingredients'] as $ai) {
-                    $attach[$ai['id']] = ['quantity' => $ai['quantity']];
+                    // pivot table has its own uuid primary `id`, generate one for each row
+                    $attach[$ai['id']] = [
+                        'id' => (string) Str::uuid(),
+                        'quantity' => $ai['quantity']
+                    ];
                 }
                 $drug->activeIngredients()->attach($attach);
             }
@@ -163,7 +167,12 @@ class DrugController extends Controller
             if (isset($data['active_ingredients'])) {
                 $sync = [];
                 foreach ($data['active_ingredients'] as $ai) {
-                    $sync[$ai['id']] = ['quantity' => $ai['quantity']];
+                    // when syncing, also provide a uuid for the pivot row so insert
+                    // operations satisfy the pivot table `id` NOT NULL primary key
+                    $sync[$ai['id']] = [
+                        'id' => (string) Str::uuid(),
+                        'quantity' => $ai['quantity']
+                    ];
                 }
                 $drug->activeIngredients()->sync($sync);
             }
