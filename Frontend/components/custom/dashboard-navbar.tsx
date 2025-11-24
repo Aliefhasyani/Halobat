@@ -117,7 +117,11 @@ export function DashboardNavbar() {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {isAuthenticated && <DropdownMenuItem>Profile</DropdownMenuItem>}
+            {isAuthenticated && (
+              <DropdownMenuItem onClick={() => router.push("/profile")}>
+                Profile
+              </DropdownMenuItem>
+            )}
             {!isAuthenticated && (
               <DropdownMenuItem onClick={() => router.push("/auth/login")}>
                 Login
