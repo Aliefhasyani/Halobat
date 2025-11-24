@@ -114,7 +114,15 @@ export const columns: ColumnDef<Drug>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <a href={`/dashboard/drugs/edit/${drug.id}`}>Edit</a>
+              <a
+                href={
+                  drug.type === "brand"
+                    ? `/dashboard/brands/edit?id=${drug.id}`
+                    : `/dashboard/drugs/edit?id=${drug.id}`
+                }
+              >
+                Edit
+              </a>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <a href="#">Delete</a>
@@ -140,7 +148,7 @@ export function DrugsDatatable() {
     const fetchDrugs = async () => {
       try {
         const response = await fetch(
-          "https://halobat-production.up.railway.app/api/drugs"
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/drugs`
         );
         const result = await response.json();
         if (result.success) {
@@ -217,14 +225,24 @@ export function DrugsDatatable() {
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter names..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+        <div className="flex-1">
+          <Input
+            placeholder="Filter names..."
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("name")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        </div>
+        <div className="ml-4">
+          <Button asChild>
+            <a href="/dashboard/drugs/create">Create Drug</a>
+          </Button>
+          <Button asChild>
+            <a href="/dashboard/brands/create">Create Branded Drug</a>
+          </Button>
+        </div>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
