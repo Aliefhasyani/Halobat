@@ -8,6 +8,7 @@ use App\Http\Controllers\DrugController;
 use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,9 @@ Route::post('/chat', [ChatController::class, 'index'])->name('chat');
 
 Route::apiResource('roles', RoleController::class);
 Route::apiResource('users', UserController::class);
+// Profile endpoints for authenticated user
+Route::get('/profile', [ProfileController::class, 'show']);
+Route::put('/profile', [ProfileController::class, 'update']);
 Route::apiResource('manufacturers', ManufacturerController::class);
 Route::apiResource('dosage-forms', DosageFormController::class);
 Route::apiResource('drugs', DrugController::class);
