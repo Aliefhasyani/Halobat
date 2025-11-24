@@ -165,16 +165,27 @@ class DrugController extends Controller
             $drug->save();
 
             if (isset($data['active_ingredients'])) {
-                $sync = [];
+                // Replace pivot rows manually to avoid sync/attach issues with
+                // a pivot table that uses its own `id` UUID primary key.
+                // Delete existing pivot rows for this drug, then insert new ones.
+                DB::table('drug_active_ingredients')->where('drug_id', $drug->id)->delete();
+
+                $now = now();
+                $inserts = [];
                 foreach ($data['active_ingredients'] as $ai) {
-                    // when syncing, also provide a uuid for the pivot row so insert
-                    // operations satisfy the pivot table `id` NOT NULL primary key
-                    $sync[$ai['id']] = [
+                    $inserts[] = [
                         'id' => (string) Str::uuid(),
-                        'quantity' => $ai['quantity']
+                        'drug_id' => $drug->id,
+                        'active_ingredient_id' => $ai['id'],
+                        'quantity' => $ai['quantity'],
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ];
                 }
-                $drug->activeIngredients()->sync($sync);
+
+                if (!empty($inserts)) {
+                    DB::table('drug_active_ingredients')->insert($inserts);
+                }
             }
 
             // brands are managed separately via BrandController
