@@ -10,7 +10,7 @@ class Brand extends Model
     use HasUuids;
 
     protected $table = 'brands';
-    protected $fillable = ['name','picture','drug_id', 'price'];
+    protected $fillable = ['id','name','picture','drug_id', 'price'];
     protected $keyType = 'string';
     public $incrementing = false;
 

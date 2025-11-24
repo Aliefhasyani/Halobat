@@ -29,7 +29,9 @@ class Drug extends Model
     }
     
     public function activeIngredients(){
-        return $this->belongsToMany(ActiveIngredient::class, 'drug_active_ingredients');
+        return $this->belongsToMany(ActiveIngredient::class, 'drug_active_ingredients')
+                    ->withPivot('quantity')
+                    ->withTimestamps();
     }
 
     /**
