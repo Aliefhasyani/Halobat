@@ -80,14 +80,13 @@ class DrugController extends Controller
         $data = $request->validate([
             'generic_name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'picture' => 'nullable|string',
-            'price' => 'nullable|numeric',
-            'manufacturer_id' => 'required|string|exists:manufacturers,id',
-            'dosage_form_id' => 'required|string|exists:dosage_forms,id',
+            'picture' => 'nullable|url',
+            'price' => 'nullable|numeric|min:0',
+            'manufacturer_id' => 'required|uuid|exists:manufacturers,id',
+            'dosage_form_id' => 'required|uuid|exists:dosage_forms,id',
             'active_ingredients' => 'nullable|array',
-            'active_ingredients.*.id' => 'required_with:active_ingredients|string|exists:active_ingredients,id',
-            'active_ingredients.*.quantity' => 'required_with:active_ingredients|numeric',
-            
+            'active_ingredients.*.id' => 'required_with:active_ingredients|uuid|exists:active_ingredients,id',
+            'active_ingredients.*.quantity' => 'required_with:active_ingredients|integer|min:1',
         ]);
 
         $created = null;
@@ -140,15 +139,14 @@ class DrugController extends Controller
 
             $data = $request->validate([
                 'generic_name' => 'sometimes|required|string|max:255',
-                'description' => 'nullable|string',
-                'picture' => 'nullable|string',
-                'price' => 'nullable|numeric',
-                'manufacturer_id' => 'sometimes|required|string|exists:manufacturers,id',
-                'dosage_form_id' => 'sometimes|required|string|exists:dosage_forms,id',
+                'description' => 'sometimes|nullable|string',
+                'picture' => 'sometimes|nullable|url',
+                'price' => 'sometimes|nullable|numeric|min:0',
+                'manufacturer_id' => 'sometimes|required|uuid|exists:manufacturers,id',
+                'dosage_form_id' => 'sometimes|required|uuid|exists:dosage_forms,id',
                 'active_ingredients' => 'nullable|array',
-                'active_ingredients.*.id' => 'required_with:active_ingredients|string|exists:active_ingredients,id',
-                'active_ingredients.*.quantity' => 'required_with:active_ingredients|numeric',
-                
+                'active_ingredients.*.id' => 'required_with:active_ingredients|uuid|exists:active_ingredients,id',
+                'active_ingredients.*.quantity' => 'required_with:active_ingredients|integer|min:1',
             ]);
 
             DB::beginTransaction();
