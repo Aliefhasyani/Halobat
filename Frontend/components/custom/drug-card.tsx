@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import {
   Card,
   CardTitle,
@@ -33,20 +34,27 @@ export function DrugCard({
   const fallbackUrl = `https://picsum.photos/seed/${encodeURIComponent(
     id
   )}/200`;
-  const imageSrc = picture || fallbackUrl;
+  const [imageSrc, setImageSrc] = React.useState<string>(
+    picture || fallbackUrl
+  );
+
+  React.useEffect(() => {
+    setImageSrc(picture || fallbackUrl);
+  }, [picture, fallbackUrl]);
 
   return (
     // remove card internal padding so the top image can sit flush with the card's rounded corners
     <Card className="flex flex-col justify-between h-full overflow-hidden p-0">
       {/* large image area (rounded top corners) */}
-      <div className="w-full h-44 sm:h-56 md:h-48 bg-muted/10 overflow-hidden rounded-t-xl">
-        <img
+      <div className="w-full h-44 sm:h-56 md:h-48 bg-muted/10 overflow-hidden rounded-t-xl relative">
+        <Image
           src={imageSrc}
           alt={name}
+          fill
+          unoptimized
           className="w-full h-full object-cover"
-          onError={(e) => {
-            const el = e.currentTarget as HTMLImageElement;
-            if (el.src !== fallbackUrl) el.src = fallbackUrl;
+          onError={() => {
+            if (imageSrc !== fallbackUrl) setImageSrc(fallbackUrl);
           }}
         />
       </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 // page no longer uses the shared DrugCard preview — render a product-style layout
@@ -92,12 +93,15 @@ export default async function Page({
           <div className="w-full bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center p-4 md:p-8">
             {/* Large image on the left (e-commerce style) */}
             {/* server-side fallback URL; no client event handlers in this server component */}
-            <img
+            <Image
               src={
                 picture ??
                 `https://picsum.photos/seed/${encodeURIComponent(id)}/800/800`
               }
               alt={name ?? "product image"}
+              width={800}
+              height={800}
+              unoptimized
               className="w-full max-w-md h-auto object-contain rounded-lg shadow-sm"
             />
           </div>

@@ -88,7 +88,7 @@ export default function EditRolePage() {
 
       if (response.ok) router.push("/dashboard/");
       else setError("Failed to update role");
-    } catch (e) {
+    } catch {
       setError("An error occurred");
     } finally {
       setLoading(false);
