@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { BubbleBackground } from "@/components/ui/shadcn-io/bubble-background";
-import FileUploader from "@/components/ui/file-uploader";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -45,9 +44,6 @@ export default function EditDrugClient() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   const [manufacturers, setManufacturers] = useState<
     Array<{ id: string; name: string }>
@@ -348,41 +344,19 @@ export default function EditDrugClient() {
                   />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
-                      <div className="flex-1">
-                        <FileUploader
-                          initialUrl={form.getValues("picture") ?? null}
-                          onUploaded={(url) => form.setValue("picture", url)}
-                        />
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {uploading
-                            ? `Uploading... ${uploadProgress ?? 0}%`
-                            : "You can also paste an image URL above."}
-                        </div>
-                      </div>
-
-                      <div className="w-28 h-28 border rounded overflow-hidden bg-white flex items-center justify-center">
-                        {form.getValues("picture") ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={String(form.getValues("picture"))}
-                            alt="preview"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : selectedFile ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={URL.createObjectURL(selectedFile)}
-                            alt="preview"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="text-sm text-muted-foreground p-2">
-                            No image
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="picture"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Picture URL</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}

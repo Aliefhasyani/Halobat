@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { BubbleBackground } from "@/components/ui/shadcn-io/bubble-background";
-import FileUploader from "@/components/ui/file-uploader";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -70,8 +69,6 @@ export default function CreateDrugPage() {
       dosage_form_id: "",
     },
   });
-
-  // file uploader handled by the FileUploader component (upload helper lives in lib/upload.ts)
 
   useEffect(() => {
     // fetch manufacturers, dosage forms, and ingredients
@@ -280,37 +277,19 @@ export default function CreateDrugPage() {
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
-                      <div className="flex-1">
-                        <FileUploader
-                          initialUrl={form.getValues("picture") ?? null}
-                          onUploaded={(url) => form.setValue("picture", url)}
-                        />
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {form.getValues("picture")
-                            ? "Uploaded image will be saved automatically"
-                            : "Select an image to upload"}
-                        </div>
-                      </div>
-
-                      <div className="w-28 h-28 border rounded overflow-hidden bg-white flex items-center justify-center">
-                        {/* preview from picture field or selected file */}
-                        {form.getValues("picture") ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={String(form.getValues("picture"))}
-                            alt="preview"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="text-sm text-muted-foreground p-2">
-                            No image
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="picture"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Picture URL</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}

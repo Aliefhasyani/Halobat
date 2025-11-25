@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { BubbleBackground } from "@/components/ui/shadcn-io/bubble-background";
-import FileUploader from "@/components/ui/file-uploader";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -42,7 +41,6 @@ export default function EditBrandClient() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
-  // FileUploader component manages upload UI + progress; we no longer track files locally here
   const [drugs, setDrugs] = useState<Array<{ id: string; name: string }>>([]);
 
   const form = useForm<FormData>({
@@ -218,33 +216,16 @@ export default function EditBrandClient() {
                   <FormField
                     control={form.control}
                     name="picture"
-                    render={() => (
+                    render={({ field }) => (
                       <FormItem>
-                        <FileUploader
-                          initialUrl={form.getValues("picture") ?? null}
-                          onUploaded={(url) => form.setValue("picture", url)}
-                        />
+                        <FormLabel>Picture URL</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <div className="text-xs text-muted-foreground mt-1">You can also paste an image URL above.</div>
-                    </div>
-
-                    <div className="w-20 h-20 border rounded overflow-hidden bg-white flex items-center justify-center">
-                      {form.getValues("picture") ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={String(form.getValues("picture"))} alt="preview" className="w-full h-full object-cover" />
-                      ) : (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={String(form.getValues("picture"))} alt="preview" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="text-sm text-muted-foreground p-2">No image</div>
-                      )}
-                    </div>
-                  </div>
 
                   <FormField
                     control={form.control}

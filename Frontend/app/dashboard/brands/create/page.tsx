@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { BubbleBackground } from "@/components/ui/shadcn-io/bubble-background";
-import FileUploader from "@/components/ui/file-uploader";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -48,8 +47,6 @@ export default function CreateBrandPage() {
       drug_id: "",
     },
   });
-
-  // FileUploader handles file selection & upload progress; local file state is no longer required
 
   useEffect(() => {
     type DrugApi = {
@@ -175,43 +172,19 @@ export default function CreateBrandPage() {
                   )}
                 />
 
-                <div className="space-y-2">
-                  <FormField
-                    control={form.control}
-                    name="picture"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FileUploader
-                          initialUrl={form.getValues("picture") ?? null}
-                          onUploaded={(url) => form.setValue("picture", url)}
-                        />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <div className="text-xs text-muted-foreground mt-1">
-                        You can also paste an image URL above.
-                      </div>
-                    </div>
-
-                    <div className="w-20 h-20 border rounded overflow-hidden bg-white flex items-center justify-center">
-                      {form.getValues("picture") ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={String(form.getValues("picture"))}
-                          alt="preview"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="text-sm text-muted-foreground p-2">
-                          No image
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <FormField
+                  control={form.control}
+                  name="picture"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Picture URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
