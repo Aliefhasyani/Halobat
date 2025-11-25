@@ -7,22 +7,19 @@ use Illuminate\Http\Request;
 
 class RoleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth')->only(['store','update','destroy']);
+        $this->middleware('role:superadmin')->only(['store','update','destroy']);
+    }
     public function index(){
-        $roles = Role::with('users')->get();
+        $roles = Role::get();
 
         $formatted = $roles->map(function ($role) {
             return [
                 'role_id' => $role->id,
                 'name' => $role->name,
-                'description' => $role->description,
-                'users_with_role' => $role->users->map(function ($user) {
-                    return [
-                        'user_id' => $user->id,
-                        'full_name' => $user->full_name,
-                        'username' => $user->username,
-                        'email' => $user->email,
-                    ];
-                })
+                'description' => $role->description
             ];
         });
 
@@ -33,7 +30,7 @@ class RoleController extends Controller
     }
 
     public function show($id){
-        $role = Role::with('users')->findOrFail($id);
+        $role = Role::findOrFail($id);
 
         return response()->json([
             'success' => true,

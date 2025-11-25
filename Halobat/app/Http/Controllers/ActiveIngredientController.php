@@ -7,22 +7,18 @@ use Illuminate\Http\Request;
 
 class ActiveIngredientController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth')->only(['store','update','destroy']);
+        $this->middleware('role:admin,superadmin')->only(['store','update','destroy']);
+    }
     
     public function index(){    
-        $ingredients = ActiveIngredient::with('drugs')->get();
+        $ingredients = ActiveIngredient::all();
         $formatted = $ingredients->map(function($ingredient){
             return [
                 'id' => $ingredient->id,
                 'ingredient_name' => $ingredient->name,
-                'related_drugs' => $ingredient->drugs->map(function($drug){
-                    return [
-                        'drug_id' => $drug->id,
-                        'generic_name' => $drug->generic_name,
-                        'description' => $drug->description,
-                        'picture' => $drug->picture,
-                        'price' => $drug->price ?? null,
-                    ];
-                })->values(),
             ];
         })->values();
 

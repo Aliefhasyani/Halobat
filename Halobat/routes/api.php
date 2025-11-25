@@ -1,37 +1,33 @@
 <?php
 
 use App\Http\Controllers\ActiveIngredientController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
-use App\Http\Controllers\DiagnosesController;
 use App\Http\Controllers\DosageFormController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Models\Manufacturer;
-use App\Models\Role;
-use Illuminate\Http\Request;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 
 // THIS IS RUNNING IN PRODUCTION. https://halobat-production.up.railway.app
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 // Auth endpoints - CSRF-exempt on backend
 Route::post('/register',[AuthController::class,'register'])->name('register');
 Route::post('/login',[AuthController::class,'login'])->name('login');
-Route::post('/logout',[AuthController::class,'logout'])->name('logout')->middleware('auth:sanctum');
+Route::post('/logout',[AuthController::class,'logout'])->middleware('jwt.auth')->name('logout');
 
+Route::post('/chat', [ChatController::class, 'index'])->name('chat');
+
+Route::apiResource('roles', RoleController::class);
 Route::apiResource('users', UserController::class);
-// Route::apiResource('diagnoses', DiagnosesController::class);
-Route::apiResource('admins', AdminController::class);
+// Profile endpoints for authenticated user
+Route::get('/profile', [ProfileController::class, 'show']);
+Route::put('/profile', [ProfileController::class, 'update']);
 Route::apiResource('manufacturers', ManufacturerController::class);
 Route::apiResource('dosage-forms', DosageFormController::class);
 Route::apiResource('drugs', DrugController::class);
 Route::apiResource('brands', BrandController::class);
-Route::apiResource('active_ingredients', ActiveIngredientController::class);
-Route::apiResource('roles', RoleController::class);
+Route::apiResource('active-ingredients', ActiveIngredientController::class);

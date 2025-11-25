@@ -1,0 +1,25 @@
+{
+  "name": "Halobat - Laravel (SQLite)",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "remoteUser": "vscode",
+  "forwardPorts": [8000, 5173],
+  "postCreateCommand": "composer install --no-interaction --no-progress --optimize-autoloader || true; if [ -f package.json ]; then npm ci --no-audit --no-fund; fi; if [ ! -f .env ]; then cp .env.example .env; fi; php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"; sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env || true; sed -i 's#^DB_DATABASE=.*#DB_DATABASE=database/database.sqlite#' .env || true; php artisan key:generate || true; php artisan migrate --force || true",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "amiralizadeh9480.laravel-extra-intellisense",
+        "onecentlin.laravel-blade",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  }
+}

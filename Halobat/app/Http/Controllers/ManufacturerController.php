@@ -8,21 +8,17 @@ use Illuminate\Http\Request;
 
 class ManufacturerController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth')->only(['store','update','destroy']);
+        $this->middleware('role:admin,superadmin')->only(['store','update','destroy']);
+    }
     public function index(){
-        $manufacturers = Manufacturer::with('drugs')->get();
+        $manufacturers = Manufacturer::all();
         $formatted = $manufacturers->map(function($manufacturer){
             return [
                 'manufacturer_id' => $manufacturer->id,
                 'manufacturer_name' => $manufacturer->name,
-                'related_drugs' => $manufacturer->drugs->map(function($drug){
-                    return [
-                        'drug_id' => $drug->id,
-                        'generic_name' => $drug->generic_name,
-                        'description' => $drug->description,
-                        'picture' => $drug->picture,
-                        'price' => $drug->price ?? null,
-                    ];
-                })->values(),
             ];
         })->values();
 

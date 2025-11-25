@@ -8,21 +8,17 @@ use Illuminate\Http\Request;
 
 class DosageFormController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth')->only(['store','update','destroy']);
+        $this->middleware('role:admin,superadmin')->only(['store','update','destroy']);
+    }
     public function index(){
-        $dosages = DosageForm::with('drugs')->get();
+        $dosages = DosageForm::all();
         $formatted = $dosages->map(function($dosage){
             return [
                 'dosage_id' => $dosage->id,
                 'dosage_name' => $dosage->name,
-                'related_drugs' => $dosage->drugs->map(function($drug){
-                    return [
-                        'drug_id' => $drug->id,
-                        'generic_name' => $drug->generic_name,
-                        'description' => $drug->description,
-                        'picture' => $drug->picture,
-                        'price' => $drug->price ?? null,
-                    ];
-                })->values(),
             ];
         })->values();
 

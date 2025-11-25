@@ -2,23 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth')->only(['store','update','destroy']);
+        $this->middleware('role:admin,superadmin')->only(['store','update','destroy']);
+    }
     public function index(){
         $users = User::with('role')->get();
 
         $formatted = $users->map(function($user){
             return [
+                'id' => $user->id,
                 'full_name' => $user->full_name,
                 'username' => $user->username,
                 'email' => $user->email,
-                'role_id' => $user->role_id,
                 'role' => $user->role->name,
             ];
         })->values();
@@ -31,13 +38,12 @@ class UserController extends Controller
 
     public function show($id){
         try{
-            $user = User::findOrFail($id);
+            $user = User::with('role')->findOrFail($id);
         
             $user_data = [
                 'full_name' => $user->full_name,
                 'username' => $user->username,
                 'email' => $user->email,
-                'role_id' => $user->role_id,
                 'role' => $user->role->name
             ];
             
@@ -61,11 +67,13 @@ class UserController extends Controller
                 'full_name' => 'required|string|max:255',
                 'username' => 'required|string|max:255',
                 'email'=> 'required|email',
-                'password' => 'required|string|min:8',
-                'role_id' => 'required|exists:roles,id'
+                'password' => 'required|string|min:8'
             ]);
 
         $data['password'] = Hash::make($data['password']);
+
+        $defaultRole = Role::where('name', 'user')->first();
+        $data['role_id'] = $defaultRole ? $defaultRole->id : null;
 
         $created_data = User::create($data);
 
@@ -86,11 +94,27 @@ class UserController extends Controller
                 'full_name' => 'required|string|max:255',
                 'username' => 'required|string|max:255',
                 'email'=> 'required|email',
-                'password' => 'required|string|min:8',
-                'role_id' => 'required|exists:roles,id'
+                'password' => 'sometimes|string|min:8',
+                'role_id' => 'sometimes|exists:roles,id'
             ]);
 
-        $data['password'] = Hash::make($data['password']);
+        // Only hash and update password when a non-empty password was provided.
+        // If the password field was sent but is empty, remove it to avoid
+        // overwriting the stored password with an empty value.
+        if (array_key_exists('password', $data)) {
+            if (!empty($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            } else {
+                unset($data['password']);
+            }
+        }
+        // Only superadmin may change role_id
+        if (array_key_exists('role_id', $data) && JWTAuth::user()->role->name !== 'superadmin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Only superadmin can change user roles.'
+            ], 403);
+        }
 
         $user->update($data);
         $user->refresh();

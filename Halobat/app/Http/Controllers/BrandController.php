@@ -2,113 +2,118 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brand;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use App\Models\Brand;
+use App\Models\Drug;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class BrandController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt.auth')->only(['store', 'update', 'destroy']);
+        $this->middleware('role:admin,superadmin')->only(['store', 'update', 'destroy']);
+    }
 
-    public function index(){
-        $brands = Brand::with('drug')->get();
+    public function index()
+    {
+        $brands = Brand::with(['drug.manufacturer', 'drug.dosageForm'])->get();
 
         $formatted = $brands->map(function ($brand) {
             return [
-                'brand_id' => $brand->id,
-                'brand_name' => $brand->name,
+                'id' => $brand->id,
+                'name' => $brand->name,
+                'description' => $brand->drug ? $brand->drug->description : null,
                 'picture' => $brand->picture,
-                'drug_data' => $brand->drug ? [
-                    'drug_id' => $brand->drug->id,
+                'price' => $brand->price,
+                'drug_id' => $brand->drug_id,
+                'drug' => $brand->drug ? [
+                    'id' => $brand->drug->id,
                     'generic_name' => $brand->drug->generic_name,
-                    'description' => $brand->drug->description,
-                    'price' => $brand->drug->price,
-                    'picture' => $brand->drug->picture,
+                    'manufacturer' => $brand->drug->manufacturer ? ['id' => $brand->drug->manufacturer->id, 'name' => $brand->drug->manufacturer->name] : null,
+                    'dosage_form' => $brand->drug->dosageForm ? ['id' => $brand->drug->dosageForm->id, 'name' => $brand->drug->dosageForm->name] : null,
                 ] : null,
             ];
-        })->values();
+        });
 
-        return response()->json([
-            'success' => true,
-            'data' => $formatted
-        ]);
+        return response()->json(['success' => true, 'data' => $formatted]);
     }
 
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'picture' => 'nullable|string',
+            'price' => 'nullable|numeric',
+            'drug_id' => 'required|string|exists:drugs,id',
+        ]);
 
-    public function show($id){
-        
-        try{
-            $brand = Brand::with('drug')->findOrFail($id);
-
-            $data = [
-                'brand_id' => $brand->id,
-                'brand_name' => $brand->name,
-                'picture' => $brand->picture,
-                'drug_data' => $brand->drug ? [
-                    'drug_id' => $brand->drug->id,
-                    'generic_name' => $brand->drug->generic_name,
-                    'description' => $brand->drug->description,
-                    'price' => $brand->drug->price,
-                    'picture' => $brand->drug->picture,
-                ] : null,
-            ];
-
-            return response()->json([
-                'success' => true,
-                'data' => $data
+        try {
+            DB::beginTransaction();
+            $brand = Brand::create([
+                'name' => $data['name'],
+                'picture' => $data['picture'] ?? null,
+                'price' => $data['price'] ?? null,
+                'drug_id' => $data['drug_id'],
             ]);
-        }catch(ModelNotFoundException $ex){
-            return response()->json([
-                'success' => false,
-                'error' => $ex -> getMessage()
-            ],404);
+            DB::commit();
+
+            return response()->json(['success' => true, 'data' => $brand->load('drug.manufacturer', 'drug.dosageForm')], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-     
     }
 
-
-    public function store(Request $request){
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'picture' => 'nullable|string',
-            'drug_id' => 'required|exists:drugs,id'
-        ]);
-
-        $brand = Brand::create($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Brand created successfully',
-            'data' => $brand,
-        ], 201);
+    public function show($id)
+    {
+        try {
+            $brand = Brand::with(['drug.manufacturer', 'drug.dosageForm'])->findOrFail($id);
+            return response()->json(['success' => true, 'data' => $brand]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Brand not found'], 404);
+        }
     }
 
-   
-    public function update(Request $request, $id){
-        $brand = Brand::findOrFail($id);
+    public function update(Request $request, $id)
+    {
+        try {
+            $brand = Brand::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|string',
-            'picture' => 'nullable|string',
-            'drug_id' => 'sometimes|exists:drugs,id'
-        ]);
+            $data = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'picture' => 'nullable|string',
+                'price' => 'nullable|numeric',
+                'drug_id' => 'sometimes|required|string|exists:drugs,id',
+            ]);
 
-        $brand->update($validated);
+            $brand->update(array_filter([
+                'name' => $data['name'] ?? null,
+                'picture' => array_key_exists('picture', $data) ? $data['picture'] : $brand->picture,
+                'price' => array_key_exists('price', $data) ? $data['price'] : $brand->price,
+                'drug_id' => $data['drug_id'] ?? $brand->drug_id,
+            ]));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Brand updated successfully',
-            'data' => $brand,
-        ]);
+            return response()->json(['success' => true, 'data' => $brand->load('drug.manufacturer', 'drug.dosageForm')]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Brand not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
-
-    public function destroy($id){
-        $brand = Brand::findOrFail($id);
-        $brand->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Brand deleted successfully',
-        ]);
+    public function destroy($id)
+    {
+        try {
+            $brand = Brand::findOrFail($id);
+            $brand->delete();
+            return response()->json(['success' => true, 'message' => 'Brand deleted']);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Brand not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }
+
