@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 // page no longer uses the shared DrugCard preview — render a product-style layout
 
 type SearchParams = { id?: string; type?: string };
@@ -74,16 +75,16 @@ export default async function Page({
       : item.dosageForm?.name ?? item.dosage_form_data?.name;
 
     return (
-      <div className="p-6 max-w-4xl mx-auto">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="p-4 max-w-4xl mx-auto">
+        <div className="mb-4 flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold">{name}</h1>
-            <div className="mt-1 text-sm text-muted-foreground">
-              {manufacturer || dosage}
-            </div>
-          </div>
-          <div>
-            <Link href="/">← Back</Link>
+            <Link
+              href="/"
+              aria-label="Back"
+              className="inline-flex items-center p-2 md:p-4 rounded-full"
+            >
+              <ArrowLeft className="h-4 w-4 text-pink-500" />
+            </Link>
           </div>
         </div>
 
@@ -102,6 +103,14 @@ export default async function Page({
           </div>
 
           <div className="bg-card p-6 rounded-lg">
+            {/* Duplicate header info here so details column also contains the title/manufacturer */}
+            <div className="mb-4 text-left">
+              <h1 className="text-2xl font-bold">{name}</h1>
+              <div className="mt-1 text-sm text-muted-foreground">
+                {manufacturer || dosage}
+              </div>
+            </div>
+
             <h2 className="text-lg font-semibold">Details</h2>
 
             <div className="mt-4 space-y-6 text-sm text-muted-foreground">
