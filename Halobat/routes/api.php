@@ -10,6 +10,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
 
 // THIS IS RUNNING IN PRODUCTION. https://halobat-production.up.railway.app
@@ -31,3 +32,6 @@ Route::apiResource('dosage-forms', DosageFormController::class);
 Route::apiResource('drugs', DrugController::class);
 Route::apiResource('brands', BrandController::class);
 Route::apiResource('active-ingredients', ActiveIngredientController::class);
+
+// Presign endpoint for direct-to-MinIO uploads (frontend requests presigned PUT URL)
+Route::post('/uploads/presign', [UploadController::class, 'presign'])->middleware('jwt.auth');
