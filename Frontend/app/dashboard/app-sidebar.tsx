@@ -1,4 +1,6 @@
 import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 import {
   Sidebar,
@@ -34,7 +36,17 @@ export function AppSidebar({
 }: AppSidebarProps) {
   return (
     <Sidebar {...props}>
-      <SidebarHeader>{/* disini nanti logo Halobat */}</SidebarHeader>
+      <SidebarHeader>
+        <Link href="/" className="flex items-center justify-center gap-3">
+          <Image
+            src="/Halobat-Logo.png"
+            alt="Halobat logo"
+            width={140}
+            height={36}
+            className="object-contain"
+          />
+        </Link>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Users</SidebarGroupLabel>

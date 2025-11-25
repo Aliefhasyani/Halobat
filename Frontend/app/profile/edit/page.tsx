@@ -73,14 +73,21 @@ export default function ProfileEditPage() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    const payload: any = {
+    type ProfileUpdatePayload = {
+      full_name: string;
+      username: string;
+      email: string;
+      password?: string;
+    };
+
+    const payload: ProfileUpdatePayload = {
       full_name: fullName,
       username,
       email,

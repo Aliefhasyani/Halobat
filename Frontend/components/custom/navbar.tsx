@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,8 +46,14 @@ export default function Navbar({
   return (
     <header className="w-full border-b h-16 flex items-center px-6">
       <div className="flex items-center gap-4 w-full max-w-[1200px] mx-auto">
-        <Link href="/" className="font-semibold text-lg">
-          Halobat
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/Halobat-Logo.png"
+            alt="Halobat"
+            width={120}
+            height={36}
+            className="object-contain"
+          />
         </Link>
 
         {showSearch && (
