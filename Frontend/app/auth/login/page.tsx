@@ -4,6 +4,8 @@ import { LoginForm } from "./login-form";
 import { BubbleBackground } from "@/components/ui/shadcn-io/bubble-background";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 export default function Page() {
   const router = useRouter();
@@ -44,6 +46,13 @@ export default function Page() {
 
       {/* page content sits above the background */}
       <div className="relative z-10 w-full max-w-sm">
+        {/* back button similar to dashboard roles create */}
+        <div className="mb-4">
+          <Button variant="ghost" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </div>
+
         <LoginForm />
       </div>
     </div>
