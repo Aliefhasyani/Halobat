@@ -15,9 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->api(prepend: [
-            // Removed Sanctum middleware
-        ]);
+        // No API middleware to prepend here
+        $middleware->api(prepend: []);
 
         // Exclude API routes from CSRF verification (they use JWT token-based auth)
         $middleware->validateCsrfTokens(except: [

@@ -37,7 +37,7 @@ return [
 
     'max_age' => 0,
     // Enable credentials so the browser will accept `Set-Cookie` and
-    // send cookies on subsequent requests (required for Sanctum cookie flow).
+    // send cookies on subsequent requests (required for cookie-based auth).
     'supports_credentials' => true,
 
 ];
