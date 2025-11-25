@@ -45,7 +45,7 @@ export default function CreateUserPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://halobat-production.up.railway.app/api/users",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/users`,
         {
           method: "POST",
           headers: {

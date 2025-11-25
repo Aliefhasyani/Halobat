@@ -109,7 +109,7 @@ export function ManufacturersDatatable() {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "https://halobat-production.up.railway.app/api/manufacturers"
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/manufacturers`
         );
         const result = await response.json();
         if (result.success && Array.isArray(result.data)) {
@@ -177,7 +177,7 @@ export function ManufacturersDatatable() {
       }
 
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/manufacturers/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/manufacturers/${id}`,
         {
           method: "DELETE",
           headers: {

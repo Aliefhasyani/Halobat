@@ -42,7 +42,7 @@ export default function CreateRolePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://halobat-production.up.railway.app/api/roles",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/roles`,
         {
           method: "POST",
           headers: {

@@ -109,7 +109,7 @@ export function RolesDatatable() {
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   React.useEffect(() => {
-    fetch("https://halobat-production.up.railway.app/api/roles")
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/roles`)
       .then((res) => res.json())
       .then((json) => {
         if (json.success) {

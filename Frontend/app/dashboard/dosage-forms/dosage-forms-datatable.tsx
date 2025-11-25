@@ -105,7 +105,7 @@ export function DosageFormsDatatable() {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "https://halobat-production.up.railway.app/api/dosage-forms"
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/dosage-forms`
         );
         const result = await response.json();
         if (result.success && Array.isArray(result.data)) {
@@ -167,7 +167,7 @@ export function DosageFormsDatatable() {
         return;
       }
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/dosage-forms/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/dosage-forms/${id}`,
         {
           method: "DELETE",
           headers: {

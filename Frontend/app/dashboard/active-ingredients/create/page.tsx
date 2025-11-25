@@ -34,7 +34,7 @@ export default function CreateIngredientPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://halobat-production.up.railway.app/api/active-ingredients",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/active-ingredients`,
         {
           method: "POST",
           headers: {

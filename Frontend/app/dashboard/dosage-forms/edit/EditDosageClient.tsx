@@ -44,7 +44,7 @@ export default function EditDosageClient() {
     const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-    fetch(`https://halobat-production.up.railway.app/api/dosage-forms/${id}`, {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/dosage-forms/${id}`, {
       headers: {
         "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -81,7 +81,7 @@ export default function EditDosageClient() {
       }
 
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/dosage-forms/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/dosage-forms/${id}`,
         {
           method: "PUT",
           headers: {

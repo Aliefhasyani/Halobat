@@ -110,7 +110,7 @@ export function ActiveIngredientsDatatable() {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          "https://halobat-production.up.railway.app/api/active-ingredients"
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/active-ingredients`
         );
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
@@ -172,7 +172,7 @@ export function ActiveIngredientsDatatable() {
         return;
       }
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/active-ingredients/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/active-ingredients/${id}`,
         {
           method: "DELETE",
           headers: {

@@ -39,7 +39,7 @@ export default function CreateManufacturerPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://halobat-production.up.railway.app/api/manufacturers",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/manufacturers`,
         {
           method: "POST",
           headers: {
