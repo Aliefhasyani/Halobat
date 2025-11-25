@@ -14,8 +14,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  FileUpload,
+  FileUploadDropzone,
+  FileUploadTrigger,
+  FileUploadList,
+  FileUploadClear,
+} from "@/components/ui/file-upload";
+import { useDirectUpload } from "@/components/ui/file-upload-direct";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UploadCloud } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -177,6 +186,11 @@ export default function EditBrandClient() {
     }
   };
 
+  // handle direct uploads — set picture field when upload returns a URL
+  const onUpload = useDirectUpload((file, url) => {
+    form.setValue("picture", String(url));
+  });
+
   return (
     <div className="relative flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <BubbleBackground className="absolute inset-0 pointer-events-none bg-primary" />
@@ -218,9 +232,55 @@ export default function EditBrandClient() {
                     name="picture"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Picture URL</FormLabel>
+                        <FormLabel>Picture</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <div>
+                            <FileUpload
+                              accept="image/*"
+                              maxSize={2 * 1024 * 1024}
+                              multiple={false}
+                              onUpload={onUpload}
+                            >
+                              <div className="space-y-2">
+                                <FileUploadDropzone className="border rounded p-4">
+                                  <div className="flex flex-col items-center gap-1 text-center w-full">
+                                    <div className="flex items-center justify-center rounded-full border p-2.5">
+                                      <UploadCloud className="h-6 w-6 text-muted-foreground" />
+                                    </div>
+
+                                    <p className="font-medium text-sm">
+                                      Drag & drop files here
+                                    </p>
+                                    <p className="text-muted-foreground text-xs">
+                                      Or click to browse
+                                    </p>
+
+                                    <div className="mt-2 flex items-center gap-2 justify-center">
+                                      <FileUploadTrigger asChild>
+                                        <Button variant="outline" size="sm">
+                                          Browse files
+                                        </Button>
+                                      </FileUploadTrigger>
+                                      <FileUploadClear className="btn-ghost" />
+                                    </div>
+                                  </div>
+
+                                  {field.value && (
+                                    <div className="mt-2 flex items-center justify-center gap-3">
+                                      <Image
+                                        src={String(field.value)}
+                                        alt="uploaded"
+                                        width={72}
+                                        height={72}
+                                        className="rounded object-cover border"
+                                      />
+                                    </div>
+                                  )}
+                                </FileUploadDropzone>
+                                <FileUploadList />
+                              </div>
+                            </FileUpload>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
