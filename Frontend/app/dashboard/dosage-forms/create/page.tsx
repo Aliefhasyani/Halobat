@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BubbleBackground } from "@/components/ui/shadcn-io/bubble-background";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -59,8 +60,10 @@ export default function CreateDosagePage() {
   };
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <BubbleBackground className="absolute inset-0 pointer-events-none bg-primary" />
+
+      <div className="relative z-10 w-full max-w-sm">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
