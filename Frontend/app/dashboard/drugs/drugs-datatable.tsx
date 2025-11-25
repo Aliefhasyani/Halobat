@@ -23,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import ConfirmDelete from "@/components/ui/confirm-delete";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -124,8 +126,14 @@ export const columns: ColumnDef<Drug>[] = [
                 Edit
               </a>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href="#">Delete</a>
+            <DropdownMenuItem
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("open-delete-drug", { detail: drug })
+                )
+              }
+            >
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -162,6 +170,97 @@ export function DrugsDatatable() {
     };
     fetchDrugs();
   }, []);
+
+  // Delete flow for drugs and branded drugs
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [selectedDrug, setSelectedDrug] = React.useState<Drug | null>(null);
+  const [deleting, setDeleting] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState("");
+
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as Drug;
+      if (detail && detail.id) {
+        setSelectedDrug(detail);
+        setDeleteError("");
+        setDeleteDialogOpen(true);
+      }
+    };
+
+    window.addEventListener("open-delete-drug", handler as EventListener);
+    return () =>
+      window.removeEventListener("open-delete-drug", handler as EventListener);
+  }, []);
+
+  const handleDelete = async (id?: string, type?: string) => {
+    if (!id) return setDeleteError("Missing drug/brand id");
+
+    setDeleting(true);
+    setDeleteError("");
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        const msg = "Not authenticated. Please login.";
+        setDeleteError(msg);
+        toast.error(msg);
+        setDeleting(false);
+        return;
+      }
+
+      const route = type === "brand" ? `/api/brands/${id}` : `/api/drugs/${id}`;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}${route}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        const msg = "Unauthorized. Please login again.";
+        setDeleteError(msg);
+        toast.error(msg);
+        setDeleting(false);
+        return;
+      }
+
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const resultObj = (await response.json()) as Record<string, unknown>;
+        if (response.ok && resultObj && resultObj.success === true) {
+          setData((prev) => prev.filter((d) => d.id !== id));
+          setDeleteDialogOpen(false);
+          setSelectedDrug(null);
+          const msg = type === "brand" ? "Brand deleted" : "Drug deleted";
+          toast.success(msg);
+        } else {
+          console.error("Error deleting item:", resultObj);
+          const errMsg =
+            typeof resultObj.error === "string"
+              ? resultObj.error
+              : "Failed to delete item";
+          setDeleteError(errMsg);
+          toast.error(errMsg);
+        }
+      } else {
+        const text = await response.text();
+        console.error("Non-JSON response:", text);
+        setDeleteError(`Delete failed: ${text.slice(0, 200)}`);
+      }
+    } catch (err) {
+      console.error(err);
+      const msg = "An error occurred";
+      setDeleteError(msg);
+      toast.error(msg);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const table = useReactTable({
     data,
@@ -291,6 +390,18 @@ export function DrugsDatatable() {
           </TableBody>
         </Table>
       </div>
+      <ConfirmDelete
+        open={deleteDialogOpen}
+        setOpen={setDeleteDialogOpen}
+        title="Delete product"
+        description={`Are you sure you want to delete ${
+          selectedDrug?.name ?? "this item"
+        }? This is permanent.`}
+        loading={deleting}
+        error={deleteError}
+        onConfirm={() => handleDelete(selectedDrug?.id, selectedDrug?.type)}
+      />
+
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="text-muted-foreground flex-1 text-sm">
           {table.getFilteredRowModel().rows.length} row(s).
