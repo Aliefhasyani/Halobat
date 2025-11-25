@@ -9,10 +9,32 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
-    const userId = localStorage.getItem("user_id");
-    if (userId) {
-      router.push("/dashboard");
-    }
+    const init = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return; // not logged in
+
+      // Ask the backend for the user's profile so we don't store role client-side
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/profile`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const json = await res.json();
+        const role = json.success ? json.data.role : "user";
+        if (role === "admin" || role === "superadmin") {
+          router.push("/dashboard");
+        } else {
+          router.push("/");
+        }
+      } catch (err) {
+        // ignore and let user use the login page
+        console.warn("profile check failed:", err);
+      }
+    };
+
+    init();
   }, [router]);
 
   return (

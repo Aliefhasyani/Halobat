@@ -41,9 +41,36 @@ export function LoginForm({
       });
       const data = await res.json();
       if (data.success) {
+        // Persist token and user id (token is required to call protected endpoints)
         localStorage.setItem("token", data.token);
         localStorage.setItem("user_id", data.user_id);
-        router.push("/dashboard");
+
+        // Don't persist role in localStorage for security reasons. Instead call the
+        // protected /api/profile endpoint (using the returned token) to obtain the
+        // user's role for immediate routing decisions.
+        try {
+          const profileRes = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/profile`,
+            {
+              headers: {
+                Authorization: `Bearer ${data.token}`,
+              },
+            }
+          );
+          const profileJson = await profileRes.json();
+          const role = profileJson.success ? profileJson.data.role : "user";
+
+          // Route based on role without storing it locally
+          if (role === "admin" || role === "superadmin") {
+            router.push("/dashboard");
+          } else {
+            router.push("/");
+          }
+        } catch (err) {
+          // If profile fetch failed, fall back to user landing page
+          console.warn("failed to fetch profile after login:", err);
+          router.push("/");
+        }
       } else {
         setError(data.message);
       }

@@ -14,6 +14,14 @@ pnpm dev
 bun dev
 ```
 
+## Development
+Start the dev server: `pnpm dev`
+
+Security note (auth):
+- The app stores authentication tokens in localStorage (key: `token`) so the client can call protected endpoints.
+- For security we do NOT persist the user's `role` in localStorage. After login the client calls `/api/profile` (server-protected) to learn the role when it needs to route or check permissions.
+	This avoids leaving role information accessible in persistent client storage.
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
