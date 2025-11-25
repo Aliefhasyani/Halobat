@@ -98,8 +98,15 @@ class UserController extends Controller
                 'role_id' => 'sometimes|exists:roles,id'
             ]);
 
+        // Only hash and update password when a non-empty password was provided.
+        // If the password field was sent but is empty, remove it to avoid
+        // overwriting the stored password with an empty value.
         if (array_key_exists('password', $data)) {
-            $data['password'] = Hash::make($data['password']);
+            if (!empty($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            } else {
+                unset($data['password']);
+            }
         }
         // Only superadmin may change role_id
         if (array_key_exists('role_id', $data) && JWTAuth::user()->role->name !== 'superadmin') {

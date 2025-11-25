@@ -163,6 +163,13 @@ export default function EditUserClient() {
         return;
       }
 
+      // Avoid sending an empty password string. If password is blank, omit it so
+      // the backend treats it as "no change" (and doesn't validate/hash it).
+      const payload: Record<string, unknown> = { ...data };
+      if (!payload.password || String(payload.password).trim() === "") {
+        delete payload.password;
+      }
+
       const response = await fetch(
         `https://halobat-production.up.railway.app/api/users/${id}`,
         {
@@ -171,7 +178,7 @@ export default function EditUserClient() {
             "Content-Type": "application/json",
             ...(token && { Authorization: `Bearer ${token}` }),
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -280,7 +287,7 @@ export default function EditUserClient() {
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input type="password" {...field} required />
+                          <Input type="password" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
