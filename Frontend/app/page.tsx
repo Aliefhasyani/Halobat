@@ -1,105 +1,161 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { MessageSquare } from "lucide-react";
+import Navbar from "@/components/custom/navbar";
+import DrugCard from "@/components/custom/drug-card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+type Drug = {
+  type: "generic" | "brand";
+  id: string;
+  name: string;
+  description?: string;
+  picture?: string | null;
+  price?: string | number;
+  manufacturer_data?: { id: string; name: string } | null;
+  dosage_form_data?: { id: string; name: string } | null;
+};
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/5 dark:bg-white/6 font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<Drug[]>([]);
+  const [search, setSearch] = useState("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/8 dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  useEffect(() => {
+    const fetchDrugs = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/drugs`
+        );
+        const json = await res.json();
+        if (json.success) setData(json.data || []);
+      } catch (err) {
+        console.error("fetch drugs error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDrugs();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = (search || "").trim().toLowerCase();
+    if (!q) return data;
+    return data.filter((d) => (d.name || "").toLowerCase().includes(q));
+  }, [data, search]);
+
+  const generic = filtered.filter((d) => d.type === "generic");
+  const brands = filtered.filter((d) => d.type === "brand");
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar showSearch value={search} onSearch={setSearch} />
+
+      <main className="max-w-[1200px] mx-auto p-6 md:p-10">
+        <h1 className="text-2xl font-semibold mb-4">Discover Medicines</h1>
+
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-medium">Generic Drugs</h2>
+              <p className="text-sm text-muted-foreground">
+                Commonly-used generics.
+              </p>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {loading ? (
+                <Skeleton className="h-4 w-12" />
+              ) : (
+                `${generic.length} item(s)`
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="p-2">
+                  <Skeleton className="h-36 w-full rounded-xl" />
+                </div>
+              ))
+            ) : generic.length ? (
+              generic.map((d) => (
+                <div key={d.id} className="p-2">
+                  <DrugCard
+                    id={d.id}
+                    name={d.name}
+                    price={d.price}
+                    type={d.type}
+                    picture={d.picture}
+                    manufacturer={d.manufacturer_data?.name ?? null}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-8 text-center text-muted-foreground">
+                No generic drugs found.
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-medium">Branded Drugs</h2>
+              <p className="text-sm text-muted-foreground">
+                Products sold under brand names.
+              </p>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {loading ? (
+                <Skeleton className="h-4 w-12" />
+              ) : (
+                `${brands.length} item(s)`
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="p-2">
+                  <Skeleton className="h-36 w-full rounded-xl" />
+                </div>
+              ))
+            ) : brands.length ? (
+              brands.map((d) => (
+                <div key={d.id} className="p-2">
+                  <DrugCard
+                    id={d.id}
+                    name={d.name}
+                    price={d.price}
+                    type={d.type}
+                    picture={d.picture}
+                    manufacturer={d.manufacturer_data?.name ?? null}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-8 text-center text-muted-foreground">
+                No branded drugs found.
+              </div>
+            )}
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      {/* Floating Chat action button */}
+      <div className="fixed right-6 bottom-6 md:right-10 md:bottom-10 z-50">
+        <Link href="/chat" aria-label="Open chat">
+          <button className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-white rounded-full shadow-lg hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/50">
+            <MessageSquare className="w-4 h-4" />
+            Chat
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }
