@@ -41,7 +41,7 @@ export default function EditManufacturerClient() {
     const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-    fetch(`https://halobat-production.up.railway.app/api/manufacturers/${id}`, {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/manufacturers/${id}`, {
       headers: {
         "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -75,7 +75,7 @@ export default function EditManufacturerClient() {
         return;
       }
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/manufacturers/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/manufacturers/${id}`,
         {
           method: "PUT",
           headers: {

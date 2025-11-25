@@ -34,7 +34,7 @@ export default function CreateDosagePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://halobat-production.up.railway.app/api/dosage-forms",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/dosage-forms`,
         {
           method: "POST",
           headers: {

@@ -24,6 +24,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import ConfirmDelete from "@/components/ui/confirm-delete";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -110,7 +112,7 @@ export function ActiveIngredientsDatatable() {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          "https://halobat-production.up.railway.app/api/active-ingredients"
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/active-ingredients`
         );
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
@@ -167,12 +169,14 @@ export function ActiveIngredientsDatatable() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setDeleteError("Not authenticated. Please login.");
+        const msg = "Not authenticated. Please login.";
+        setDeleteError(msg);
+        toast.error(msg);
         setDeleting(false);
         return;
       }
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/active-ingredients/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/active-ingredients/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -182,7 +186,9 @@ export function ActiveIngredientsDatatable() {
         }
       );
       if (response.status === 401) {
-        setDeleteError("Unauthorized. Please login again.");
+        const msg = "Unauthorized. Please login again.";
+        setDeleteError(msg);
+        toast.error(msg);
         setDeleting(false);
         return;
       }
@@ -193,8 +199,11 @@ export function ActiveIngredientsDatatable() {
           setData((prev) => prev.filter((p) => p.id !== id));
           setDeleteDialogOpen(false);
           setSelectedIngredient(null);
+          toast.success("Ingredient deleted");
         } else {
-          setDeleteError(resultObj.error || "Failed to delete ingredient");
+          const err = resultObj.error || "Failed to delete ingredient";
+          setDeleteError(err);
+          toast.error(err);
         }
       } else {
         const text = await response.text();
@@ -202,7 +211,9 @@ export function ActiveIngredientsDatatable() {
       }
     } catch (err) {
       console.error(err);
-      setDeleteError("An error occurred");
+      const msg = "An error occurred";
+      setDeleteError(msg);
+      toast.error(msg);
     } finally {
       setDeleting(false);
     }
@@ -348,38 +359,23 @@ export function ActiveIngredientsDatatable() {
           </Button>
         </div>
       </div>
-      {/* Delete dialog */}
-      {deleteDialogOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded p-6 shadow-lg w-full max-w-md">
-            <h3 className="text-lg font-medium">Delete ingredient</h3>
-            <p className="mt-2 text-sm">
-              Are you sure you want to delete{" "}
-              {selectedIngredient?.name ?? "this ingredient"}? This action
-              cannot be undone.
-            </p>
-            {deleteError && <p className="text-red-500 mt-2">{deleteError}</p>}
-            <div className="mt-4 flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setDeleteDialogOpen(false);
-                  setSelectedIngredient(null);
-                  setDeleteError("");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => handleDelete(selectedIngredient?.id)}
-                disabled={deleting}
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDelete
+        open={deleteDialogOpen}
+        setOpen={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) {
+            setSelectedIngredient(null);
+            setDeleteError("");
+          }
+        }}
+        title="Delete ingredient"
+        description={`Are you sure you want to delete ${
+          selectedIngredient?.name ?? "this ingredient"
+        }? This action cannot be undone.`}
+        loading={deleting}
+        error={deleteError}
+        onConfirm={() => handleDelete(selectedIngredient?.id)}
+      />
     </div>
   );
 }

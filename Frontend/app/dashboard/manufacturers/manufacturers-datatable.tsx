@@ -24,6 +24,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import ConfirmDelete from "@/components/ui/confirm-delete";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -109,7 +111,7 @@ export function ManufacturersDatatable() {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "https://halobat-production.up.railway.app/api/manufacturers"
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/manufacturers`
         );
         const result = await response.json();
         if (result.success && Array.isArray(result.data)) {
@@ -171,13 +173,15 @@ export function ManufacturersDatatable() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setDeleteError("Not authenticated. Please login.");
+        const msg = "Not authenticated. Please login.";
+        setDeleteError(msg);
+        toast.error(msg);
         setDeleting(false);
         return;
       }
 
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/manufacturers/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/manufacturers/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -188,7 +192,9 @@ export function ManufacturersDatatable() {
       );
 
       if (response.status === 401) {
-        setDeleteError("Unauthorized. Please login again.");
+        const msg = "Unauthorized. Please login again.";
+        setDeleteError(msg);
+        toast.error(msg);
         setDeleting(false);
         return;
       }
@@ -200,6 +206,7 @@ export function ManufacturersDatatable() {
           setData((prev) => prev.filter((m) => m.id !== id));
           setDeleteDialogOpen(false);
           setSelectedManufacturer(null);
+          toast.success("Manufacturer deleted");
         } else {
           console.error("Error deleting manufacturer:", resultObj);
           const errMsg =
@@ -207,6 +214,7 @@ export function ManufacturersDatatable() {
               ? resultObj.error
               : "Failed to delete manufacturer";
           setDeleteError(errMsg);
+          toast.error(errMsg);
         }
       } else {
         const text = await response.text();
@@ -215,7 +223,9 @@ export function ManufacturersDatatable() {
       }
     } catch (err) {
       console.error(err);
-      setDeleteError("An error occurred");
+      const msg = "An error occurred";
+      setDeleteError(msg);
+      toast.error(msg);
     } finally {
       setDeleting(false);
     }
@@ -361,38 +371,23 @@ export function ManufacturersDatatable() {
           </Button>
         </div>
       </div>
-      {/* Delete dialog */}
-      {deleteDialogOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded p-6 shadow-lg w-full max-w-md">
-            <h3 className="text-lg font-medium">Delete manufacturer</h3>
-            <p className="mt-2 text-sm">
-              Are you sure you want to delete{" "}
-              {selectedManufacturer?.name ?? "this manufacturer"}? This action
-              cannot be undone.
-            </p>
-            {deleteError && <p className="text-red-500 mt-2">{deleteError}</p>}
-            <div className="mt-4 flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setDeleteDialogOpen(false);
-                  setSelectedManufacturer(null);
-                  setDeleteError("");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => handleDelete(selectedManufacturer?.id)}
-                disabled={deleting}
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDelete
+        open={deleteDialogOpen}
+        setOpen={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) {
+            setSelectedManufacturer(null);
+            setDeleteError("");
+          }
+        }}
+        title="Delete manufacturer"
+        description={`Are you sure you want to delete ${
+          selectedManufacturer?.name ?? "this manufacturer"
+        }? This action cannot be undone.`}
+        loading={deleting}
+        error={deleteError}
+        onConfirm={() => handleDelete(selectedManufacturer?.id)}
+      />
     </div>
   );
 }

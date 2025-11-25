@@ -24,6 +24,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import ConfirmDelete from "@/components/ui/confirm-delete";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -105,7 +107,7 @@ export function DosageFormsDatatable() {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "https://halobat-production.up.railway.app/api/dosage-forms"
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/dosage-forms`
         );
         const result = await response.json();
         if (result.success && Array.isArray(result.data)) {
@@ -162,12 +164,14 @@ export function DosageFormsDatatable() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setDeleteError("Not authenticated. Please login.");
+        const msg = "Not authenticated. Please login.";
+        setDeleteError(msg);
+        toast.error(msg);
         setDeleting(false);
         return;
       }
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/dosage-forms/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/dosage-forms/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -177,7 +181,9 @@ export function DosageFormsDatatable() {
         }
       );
       if (response.status === 401) {
-        setDeleteError("Unauthorized. Please login again.");
+        const msg = "Unauthorized. Please login again.";
+        setDeleteError(msg);
+        toast.error(msg);
         setDeleting(false);
         return;
       }
@@ -188,8 +194,11 @@ export function DosageFormsDatatable() {
           setData((prev) => prev.filter((p) => p.id !== id));
           setDeleteDialogOpen(false);
           setSelectedDosage(null);
+          toast.success("Dosage deleted");
         } else {
-          setDeleteError(resultObj.error || "Failed to delete dosage");
+          const errMsg = resultObj.error || "Failed to delete dosage";
+          setDeleteError(errMsg);
+          toast.error(errMsg);
         }
       } else {
         const text = await response.text();
@@ -197,7 +206,9 @@ export function DosageFormsDatatable() {
       }
     } catch (err) {
       console.error(err);
-      setDeleteError("An error occurred");
+      const msg = "An error occurred";
+      setDeleteError(msg);
+      toast.error(msg);
     } finally {
       setDeleting(false);
     }
@@ -341,38 +352,23 @@ export function DosageFormsDatatable() {
           </Button>
         </div>
       </div>
-      {/* Delete dialog */}
-      {deleteDialogOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded p-6 shadow-lg w-full max-w-md">
-            <h3 className="text-lg font-medium">Delete dosage</h3>
-            <p className="mt-2 text-sm">
-              Are you sure you want to delete{" "}
-              {selectedDosage?.name ?? "this dosage"}? This action cannot be
-              undone.
-            </p>
-            {deleteError && <p className="text-red-500 mt-2">{deleteError}</p>}
-            <div className="mt-4 flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setDeleteDialogOpen(false);
-                  setSelectedDosage(null);
-                  setDeleteError("");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => handleDelete(selectedDosage?.id)}
-                disabled={deleting}
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDelete
+        open={deleteDialogOpen}
+        setOpen={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) {
+            setSelectedDosage(null);
+            setDeleteError("");
+          }
+        }}
+        title="Delete dosage"
+        description={`Are you sure you want to delete ${
+          selectedDosage?.name ?? "this dosage"
+        }? This action cannot be undone.`}
+        loading={deleting}
+        error={deleteError}
+        onConfirm={() => handleDelete(selectedDosage?.id)}
+      />
     </div>
   );
 }

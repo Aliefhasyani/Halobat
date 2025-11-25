@@ -59,15 +59,12 @@ export default function EditUserClient() {
       typeof window !== "undefined" ? localStorage.getItem("user_id") : null;
 
     if (viewer_id) {
-      fetch(
-        `https://halobat-production.up.railway.app/api/users/${viewer_id}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-        }
-      )
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${viewer_id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      })
         .then((res) => res.json())
         .then((json) => {
           if (json.success && json.data)
@@ -76,7 +73,7 @@ export default function EditUserClient() {
         .catch(() => {});
     }
 
-    fetch("https://halobat-production.up.railway.app/api/roles")
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/roles`)
       .then((res) => res.json())
       .then((json) => {
         if (json.success && Array.isArray(json.data)) {
@@ -108,7 +105,7 @@ export default function EditUserClient() {
     const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-    fetch(`https://halobat-production.up.railway.app/api/users/${id}`, {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${id}`, {
       headers: {
         "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -171,7 +168,7 @@ export default function EditUserClient() {
       }
 
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/users/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${id}`,
         {
           method: "PUT",
           headers: {

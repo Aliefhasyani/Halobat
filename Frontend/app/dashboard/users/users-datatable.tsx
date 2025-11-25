@@ -23,15 +23,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+import ConfirmDelete from "@/components/ui/confirm-delete";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -139,7 +132,7 @@ export function UsersDatatable() {
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   React.useEffect(() => {
-    fetch("https://halobat-production.up.railway.app/api/users")
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/users`)
       .then((res) => res.json())
       .then((json) => {
         if (json.success) {
@@ -181,13 +174,15 @@ export function UsersDatatable() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setDeleteError("Not authenticated. Please login.");
+        const msg = "Not authenticated. Please login.";
+        setDeleteError(msg);
+        toast.error(msg);
         setDeleting(false);
         return;
       }
 
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/users/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -198,7 +193,9 @@ export function UsersDatatable() {
       );
 
       if (response.status === 401) {
-        setDeleteError("Unauthorized. Please login again.");
+        const msg = "Unauthorized. Please login again.";
+        setDeleteError(msg);
+        toast.error(msg);
         setDeleting(false);
         return;
       }
@@ -210,6 +207,7 @@ export function UsersDatatable() {
           setData((prev) => prev.filter((u) => u.id !== id));
           setDeleteDialogOpen(false);
           setSelectedUser(null);
+          toast.success("User deleted");
         } else {
           console.error("Error deleting user:", resultObj);
           const errMsg =
@@ -217,6 +215,7 @@ export function UsersDatatable() {
               ? resultObj.error
               : "Failed to delete user";
           setDeleteError(errMsg);
+          toast.error(errMsg);
         }
       } else {
         const text = await response.text();
@@ -225,7 +224,9 @@ export function UsersDatatable() {
       }
     } catch (err) {
       console.error(err);
-      setDeleteError("An error occurred");
+      const msg = "An error occurred";
+      setDeleteError(msg);
+      toast.error(msg);
     } finally {
       setDeleting(false);
     }
@@ -370,38 +371,24 @@ export function UsersDatatable() {
           </TableBody>
         </Table>
       </div>
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Delete user</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete{" "}
-              {selectedUser?.full_name ?? "this user"}? This action cannot be
-              undone.
-            </DialogDescription>
-          </DialogHeader>
-          {deleteError && <p className="text-red-500">{deleteError}</p>}
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedUser(null);
-                  setDeleteError("");
-                }}
-              >
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
-              onClick={() => handleDelete(selectedUser?.id)}
-              disabled={deleting}
-            >
-              {deleting ? "Deleting..." : "Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDelete
+        open={deleteDialogOpen}
+        setOpen={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) {
+            // clear selection when dialog closes
+            setSelectedUser(null);
+            setDeleteError("");
+          }
+        }}
+        title="Delete user"
+        description={`Are you sure you want to delete ${
+          selectedUser?.full_name ?? "this user"
+        }? This action cannot be undone.`}
+        loading={deleting}
+        error={deleteError}
+        onConfirm={() => handleDelete(selectedUser?.id)}
+      />
 
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="text-muted-foreground flex-1 text-sm">

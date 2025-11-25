@@ -44,15 +44,12 @@ export default function EditIngredientClient() {
     const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-    fetch(
-      `https://halobat-production.up.railway.app/api/active-ingredients/${id}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-      }
-    )
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/active-ingredients/${id}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    })
       .then((res) => res.json())
       .then((json) => {
         if (json.success && json.data) {
@@ -86,7 +83,7 @@ export default function EditIngredientClient() {
       }
 
       const response = await fetch(
-        `https://halobat-production.up.railway.app/api/active-ingredients/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/active-ingredients/${id}`,
         {
           method: "PUT",
           headers: {
