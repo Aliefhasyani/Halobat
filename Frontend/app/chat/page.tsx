@@ -1,19 +1,29 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-// Avatar not required in this layout — kept the page minimal & focused on input
 import CustomBubbleBackground from "@/components/custom/bubble-background";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-// Card/Textarea not required in this layout
 import { Send, ArrowLeft } from "lucide-react";
 import DrugCard from "@/components/custom/drug-card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+type Recommendation = {
+  id: string;
+  name: string;
+  price?: number;
+  picture?: string | null;
+  manufacturer?: string | null;
+  quantity?: number;
+};
 
 type Message = {
   id: string;
   sender: "user" | "assistant";
   text: string;
+  loading?: boolean; // when true, render a skeleton placeholder for this assistant message
+  recommendedDrugs?: Recommendation[];
 };
 
 export default function ChatPage() {
@@ -22,32 +32,19 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [recommendedDrugs, setRecommendedDrugs] = useState<
-    {
-      id: string;
-      name: string;
-      price?: number;
-      picture?: string | null;
-      manufacturer?: string | null;
-      quantity?: number;
-    }[]
-  >([]);
-  // message container ref so we can auto-scroll when messages change
+
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    // start with an empty conversation for the UI in this layout
-    setMessages([]);
-  }, []);
+  useEffect(() => setMessages([]), []);
 
-  // autoscroll to bottom whenever messages change
   useEffect(() => {
     const el = messagesRef.current;
     if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    setTimeout(
+      () => el.scrollTo({ top: el.scrollHeight, behavior: "smooth" }),
+      40
+    );
   }, [messages]);
-
-  // no scrolling behaviour in this layout (we show a short preview)
 
   async function send() {
     const text = input.trim();
@@ -60,74 +57,88 @@ export default function ChatPage() {
       sender: "user",
       text,
     };
-
     setMessages((prev) => [...prev, userMessage]);
-    // clear previous recommendations when user sends a new query
-    setRecommendedDrugs([]);
     setInput("");
     setLoading(true);
+
+    // push a skeleton assistant message so the user sees a loading placeholder
+    const skeletonId = String(Date.now()) + "-l";
+    const skeletonMessage: Message = {
+      id: skeletonId,
+      sender: "assistant",
+      text: "",
+      loading: true,
+    };
+    setMessages((prev) => [...prev, skeletonMessage]);
 
     try {
       const apiUrl =
         (process.env.NEXT_PUBLIC_BASE_URL &&
           `${process.env.NEXT_PUBLIC_BASE_URL.replace(/\/$/, "")}/api/chat`) ||
         "/api/chat";
-
       const resp = await fetch(apiUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text }),
       });
-
-      if (!resp.ok) {
-        const txt = await resp.text();
-        throw new Error(txt || "Unknown error");
-      }
-
+      if (!resp.ok) throw new Error((await resp.text()) || "Unknown error");
       const body = await resp.json();
 
-      // response from backend: { success: true, diagnosis: string, recommended_drugs: [ ... ] }
       const diagnosisText =
         (body &&
           (body.diagnosis ?? body.data ?? body.answer ?? body.message)) ||
         "No response";
-
       const assistantMessage: Message = {
         id: String(Date.now()) + "-a",
         sender: "assistant",
         text: diagnosisText,
       };
+      // replace the skeleton message with the real assistant message
+      setMessages((prev) =>
+        prev.map((m) => (m.id === skeletonId ? assistantMessage : m))
+      );
 
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      if (body && Array.isArray(body.recommended_drugs)) {
-        setRecommendedDrugs(body.recommended_drugs);
-      } else {
-        setRecommendedDrugs([]);
+      if (
+        body &&
+        Array.isArray(body.recommended_drugs) &&
+        body.recommended_drugs.length > 0
+      ) {
+        const recMsg: Message = {
+          id: String(Date.now()) + "-r",
+          sender: "assistant",
+          // leave text empty so we only show the drug cards (no label)
+          text: "",
+          recommendedDrugs: body.recommended_drugs,
+        };
+        // append the recommendations AFTER the assistant message replacement above
+        setTimeout(() => setMessages((prev) => [...prev, recMsg]), 0);
       }
-    } catch (err: unknown) {
+    } catch (err) {
       console.error("Chat error:", err);
       const message = err instanceof Error ? err.message : String(err);
       setError(message || "Failed to get an answer");
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: String(Date.now()) + "-err",
-          sender: "assistant",
-          text: "Sorry, something went wrong while contacting the chat service.",
-        },
-      ]);
+      // replace skeleton with a helpful error message
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === skeletonId
+            ? {
+                id: String(Date.now()) + "-err",
+                sender: "assistant",
+                text: "Sorry, something went wrong while contacting the chat service.",
+                loading: false,
+              }
+            : m
+        )
+      );
     } finally {
       setLoading(false);
     }
   }
+
   return (
     <>
       <CustomBubbleBackground className="min-h-screen py-4">
         <div className="max-w-[1100px] mx-auto px-6">
-          {/* top-left small back icon placeholder */}
           <div className="flex items-start justify-between">
             <div>
               <Button
@@ -141,9 +152,8 @@ export default function ChatPage() {
             <div className="hidden md:block" />
           </div>
 
-          {/* centered header */}
           <div className="text-center mt-6 mb-12">
-            <div className="text-2xl text-muted-foreground mb-2">✨</div>
+            <div className="text-2xl text-muted-foreground mb-2"></div>
             <h1 className="text-xl md:text-2xl font-semibold">
               Ask our AI about your complaint!
             </h1>
@@ -153,7 +163,6 @@ export default function ChatPage() {
             </p>
           </div>
 
-          {/* suggestion chips */}
           <div className="flex justify-center gap-4 flex-wrap mb-10 text-sm">
             {[
               "Saya demam, merasa lemah, atau menggigil",
@@ -165,34 +174,65 @@ export default function ChatPage() {
                 variant="outline"
                 size="sm"
                 className="bg-white/60 border rounded-md px-4 py-3 text-sm text-muted-foreground shadow-sm hover:shadow-md"
-                onClick={() => {
-                  setInput(s);
-                }}
+                onClick={() => setInput(s)}
               >
                 {s}
               </Button>
             ))}
           </div>
 
-          {/* chat input area centered */}
           <div className="max-w-[800px] mx-auto">
-            {/* chat results / scrollable conversation */}
             <div className="mt-8">
               <div
                 ref={messagesRef}
                 className="h-[46vh] md:h-[50vh] overflow-y-auto space-y-3 px-2 pb-6"
               >
-                {/* show messages in order */}
                 {messages.map((m) => (
                   <div
                     key={m.id}
-                    className={`p-3 rounded-md ${
-                      m.sender === "assistant"
-                        ? "bg-white/90 border"
-                        : "bg-primary text-primary-foreground"
+                    className={`${
+                      m.recommendedDrugs && m.recommendedDrugs.length > 0
+                        ? "p-0 bg-transparent border-0"
+                        : `p-3 rounded-md ${
+                            m.sender === "assistant"
+                              ? "bg-white/90 border"
+                              : "bg-primary text-primary-foreground"
+                          }`
                     }`}
                   >
-                    <div className="text-sm whitespace-pre-wrap">{m.text}</div>
+                    {/* Only render the text skeleton/contents when there's text or the message is loading */}
+                    {(m.loading || m.text) && (
+                      <div className="text-sm whitespace-pre-wrap">
+                        {m.loading ? (
+                          <div className="space-y-2 max-w-[86%]">
+                            <Skeleton className="h-3 w-2/3" />
+                            <Skeleton className="h-3 w-1/2" />
+                          </div>
+                        ) : (
+                          m.text
+                        )}
+                      </div>
+                    )}
+                    {m.recommendedDrugs && m.recommendedDrugs.length > 0 && (
+                      // render the cards without a bubble background so only the cards are visible
+                      <div className="mt-3">
+                        <div className="flex gap-3 overflow-x-auto py-2 scrollbar-hide">
+                          {m.recommendedDrugs.map((d) => (
+                            <div key={d.id} className="min-w-[180px] shrink-0">
+                              <DrugCard
+                                id={d.id}
+                                name={d.name}
+                                price={d.price ?? ""}
+                                picture={d.picture}
+                                manufacturer={d.manufacturer}
+                                dosage={null}
+                                type={"generic"}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -206,12 +246,10 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* fixed input bar at bottom of viewport */}
         <div className="fixed left-1/2 bottom-6 z-40 w-[min(96%,1100px)] -translate-x-1/2">
           <div className="max-w-[800px] mx-auto">
-            {/* bottom warning banner */}
             <div className="mb-4 border border-rose-200 bg-rose-50/60 px-4 py-3 rounded-lg flex items-start gap-4">
-              <div className="text-2xl text-rose-500">⚠️</div>
+              <div className="text-2xl text-rose-500"></div>
               <div className="text-sm text-rose-700">
                 Informasi dari AI ini bukan pengganti konsultasi dokter. Selalu
                 konsultasikan ke tenaga medis sebelum menggunakan obat!
@@ -230,44 +268,20 @@ export default function ChatPage() {
                 }}
                 className="bg-transparent shadow-none border-0 text-sm placeholder:text-muted-foreground"
               />
-
               <Button
                 onClick={send}
                 disabled={loading || !input.trim()}
                 variant="ghost"
                 size="icon"
                 className="text-primary"
+                aria-busy={loading}
               >
-                <Send className={`size-4 ${loading ? "animate-spin" : ""}`} />
+                <Send className="size-4" />
               </Button>
             </div>
           </div>
         </div>
       </CustomBubbleBackground>
-
-      {/* recommended drugs list (vertical) - shows above the fixed input */}
-      {recommendedDrugs.length > 0 && (
-        <div className="fixed left-1/2 bottom-24 z-40 w-[min(96%,1100px)] -translate-x-1/2">
-          <div className="max-w-[800px] mx-auto bg-white/95 border rounded-lg shadow-lg p-4">
-            <div className="text-sm font-semibold mb-2">Rekomendasi Obat</div>
-            <div className="flex flex-col gap-3">
-              {recommendedDrugs.map((d) => (
-                <div key={d.id} className="w-full">
-                  <DrugCard
-                    id={d.id}
-                    name={d.name}
-                    price={d.price}
-                    picture={d.picture}
-                    manufacturer={d.manufacturer}
-                    dosage={null}
-                    type={"generic"}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
