@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 // Card/Textarea not required in this layout
 import { Send, ArrowLeft } from "lucide-react";
+import DrugCard from "@/components/custom/drug-card";
 
 type Message = {
   id: string;
@@ -21,6 +22,16 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [recommendedDrugs, setRecommendedDrugs] = useState<
+    {
+      id: string;
+      name: string;
+      price?: number;
+      picture?: string | null;
+      manufacturer?: string | null;
+      quantity?: number;
+    }[]
+  >([]);
   // message container ref so we can auto-scroll when messages change
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
@@ -51,11 +62,18 @@ export default function ChatPage() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    // clear previous recommendations when user sends a new query
+    setRecommendedDrugs([]);
     setInput("");
     setLoading(true);
 
     try {
-      const resp = await fetch("/api/chat", {
+      const apiUrl =
+        (process.env.NEXT_PUBLIC_BASE_URL &&
+          `${process.env.NEXT_PUBLIC_BASE_URL.replace(/\/$/, "")}/api/chat`) ||
+        "/api/chat";
+
+      const resp = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,16 +87,26 @@ export default function ChatPage() {
       }
 
       const body = await resp.json();
-      const answer =
-        (body && (body.data ?? body.answer ?? body.message)) || "No response";
+
+      // response from backend: { success: true, diagnosis: string, recommended_drugs: [ ... ] }
+      const diagnosisText =
+        (body &&
+          (body.diagnosis ?? body.data ?? body.answer ?? body.message)) ||
+        "No response";
 
       const assistantMessage: Message = {
         id: String(Date.now()) + "-a",
         sender: "assistant",
-        text: answer,
+        text: diagnosisText,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+
+      if (body && Array.isArray(body.recommended_drugs)) {
+        setRecommendedDrugs(body.recommended_drugs);
+      } else {
+        setRecommendedDrugs([]);
+      }
     } catch (err: unknown) {
       console.error("Chat error:", err);
       const message = err instanceof Error ? err.message : String(err);
@@ -96,122 +124,150 @@ export default function ChatPage() {
     }
   }
   return (
-    <CustomBubbleBackground className="min-h-screen py-4">
-      <div className="max-w-[1100px] mx-auto px-6">
-        {/* top-left small back icon placeholder */}
-        <div className="flex items-start justify-between">
-          <div>
-            <Button
-              variant="ghost"
-              onClick={() => router.back()}
-              className="p-2 md:p-4 rounded-full"
-            >
-              <ArrowLeft className="h-4 w-4 text-pink-500" />
-            </Button>
+    <>
+      <CustomBubbleBackground className="min-h-screen py-4">
+        <div className="max-w-[1100px] mx-auto px-6">
+          {/* top-left small back icon placeholder */}
+          <div className="flex items-start justify-between">
+            <div>
+              <Button
+                variant="ghost"
+                onClick={() => router.back()}
+                className="p-2 md:p-4 rounded-full"
+              >
+                <ArrowLeft className="h-4 w-4 text-pink-500" />
+              </Button>
+            </div>
+            <div className="hidden md:block" />
           </div>
-          <div className="hidden md:block" />
+
+          {/* centered header */}
+          <div className="text-center mt-6 mb-12">
+            <div className="text-2xl text-muted-foreground mb-2">✨</div>
+            <h1 className="text-xl md:text-2xl font-semibold">
+              Ask our AI about your complaint!
+            </h1>
+            <p className="mt-3 text-muted-foreground text-sm">
+              Get a quick suggestion for likely diagnoses and medications (for
+              reference only).
+            </p>
+          </div>
+
+          {/* suggestion chips */}
+          <div className="flex justify-center gap-4 flex-wrap mb-10 text-sm">
+            {[
+              "Saya demam, merasa lemah, atau menggigil",
+              "Saya mengalami batuk, pilek, atau sesak napas",
+              "Saya mengalami sakit kepala, pusing, atau migrain",
+            ].map((s) => (
+              <Button
+                key={s}
+                variant="outline"
+                size="sm"
+                className="bg-white/60 border rounded-md px-4 py-3 text-sm text-muted-foreground shadow-sm hover:shadow-md"
+                onClick={() => {
+                  setInput(s);
+                }}
+              >
+                {s}
+              </Button>
+            ))}
+          </div>
+
+          {/* chat input area centered */}
+          <div className="max-w-[800px] mx-auto">
+            {/* chat results / scrollable conversation */}
+            <div className="mt-8">
+              <div
+                ref={messagesRef}
+                className="h-[46vh] md:h-[50vh] overflow-y-auto space-y-3 px-2 pb-6"
+              >
+                {/* show messages in order */}
+                {messages.map((m) => (
+                  <div
+                    key={m.id}
+                    className={`p-3 rounded-md ${
+                      m.sender === "assistant"
+                        ? "bg-white/90 border"
+                        : "bg-primary text-primary-foreground"
+                    }`}
+                  >
+                    <div className="text-sm whitespace-pre-wrap">{m.text}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* centered header */}
-        <div className="text-center mt-6 mb-12">
-          <div className="text-2xl text-muted-foreground mb-2">✨</div>
-          <h1 className="text-xl md:text-2xl font-semibold">
-            Ask our AI about your complaint!
-          </h1>
-          <p className="mt-3 text-muted-foreground text-sm">
-            Get a quick suggestion for likely diagnoses and medications (for
-            reference only).
-          </p>
-        </div>
+        {error && (
+          <div className="mt-3 text-sm text-destructive text-center">
+            {error}
+          </div>
+        )}
 
-        {/* suggestion chips */}
-        <div className="flex justify-center gap-4 flex-wrap mb-10 text-sm">
-          {[
-            "Saya demam, merasa lemah, atau menggigil",
-            "Saya mengalami batuk, pilek, atau sesak napas",
-            "Saya mengalami sakit kepala, pusing, atau migrain",
-          ].map((s) => (
-            <Button
-              key={s}
-              variant="outline"
-              size="sm"
-              className="bg-white/60 border rounded-md px-4 py-3 text-sm text-muted-foreground shadow-sm hover:shadow-md"
-              onClick={() => {
-                setInput(s);
-              }}
-            >
-              {s}
-            </Button>
-          ))}
-        </div>
+        {/* fixed input bar at bottom of viewport */}
+        <div className="fixed left-1/2 bottom-6 z-40 w-[min(96%,1100px)] -translate-x-1/2">
+          <div className="max-w-[800px] mx-auto">
+            {/* bottom warning banner */}
+            <div className="mb-4 border border-rose-200 bg-rose-50/60 px-4 py-3 rounded-lg flex items-start gap-4">
+              <div className="text-2xl text-rose-500">⚠️</div>
+              <div className="text-sm text-rose-700">
+                Informasi dari AI ini bukan pengganti konsultasi dokter. Selalu
+                konsultasikan ke tenaga medis sebelum menggunakan obat!
+              </div>
+            </div>
+            <div className="bg-white/95 border rounded-lg shadow-lg p-3 flex items-center gap-3">
+              <Input
+                placeholder="Tanyakan apapun kepada saya !"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
+                className="bg-transparent shadow-none border-0 text-sm placeholder:text-muted-foreground"
+              />
 
-        {/* chat input area centered */}
-        <div className="max-w-[800px] mx-auto">
-          {/* chat results / scrollable conversation */}
-          <div className="mt-8">
-            <div
-              ref={messagesRef}
-              className="h-[46vh] md:h-[50vh] overflow-y-auto space-y-3 px-2 pb-6"
-            >
-              {/* show messages in order */}
-              {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`p-3 rounded-md ${
-                    m.sender === "assistant"
-                      ? "bg-white/90 border"
-                      : "bg-primary text-primary-foreground"
-                  }`}
-                >
-                  <div className="text-sm whitespace-pre-wrap">{m.text}</div>
+              <Button
+                onClick={send}
+                disabled={loading || !input.trim()}
+                variant="ghost"
+                size="icon"
+                className="text-primary"
+              >
+                <Send className={`size-4 ${loading ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </CustomBubbleBackground>
+
+      {/* recommended drugs list (vertical) - shows above the fixed input */}
+      {recommendedDrugs.length > 0 && (
+        <div className="fixed left-1/2 bottom-24 z-40 w-[min(96%,1100px)] -translate-x-1/2">
+          <div className="max-w-[800px] mx-auto bg-white/95 border rounded-lg shadow-lg p-4">
+            <div className="text-sm font-semibold mb-2">Rekomendasi Obat</div>
+            <div className="flex flex-col gap-3">
+              {recommendedDrugs.map((d) => (
+                <div key={d.id} className="w-full">
+                  <DrugCard
+                    id={d.id}
+                    name={d.name}
+                    price={d.price}
+                    picture={d.picture}
+                    manufacturer={d.manufacturer}
+                    dosage={null}
+                    type={"generic"}
+                  />
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </div>
-
-      {error && (
-        <div className="mt-3 text-sm text-destructive text-center">{error}</div>
       )}
-
-      {/* fixed input bar at bottom of viewport */}
-      <div className="fixed left-1/2 bottom-6 z-40 w-[min(96%,1100px)] -translate-x-1/2">
-        <div className="max-w-[800px] mx-auto">
-          {/* bottom warning banner */}
-          <div className="mb-4 border border-rose-200 bg-rose-50/60 px-4 py-3 rounded-lg flex items-start gap-4">
-            <div className="text-2xl text-rose-500">⚠️</div>
-            <div className="text-sm text-rose-700">
-              Informasi dari AI ini bukan pengganti konsultasi dokter. Selalu
-              konsultasikan ke tenaga medis sebelum menggunakan obat!
-            </div>
-          </div>
-          <div className="bg-white/95 border rounded-lg shadow-lg p-3 flex items-center gap-3">
-            <Input
-              placeholder="Tanyakan apapun kepada saya !"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  send();
-                }
-              }}
-              className="bg-transparent shadow-none border-0 text-sm placeholder:text-muted-foreground"
-            />
-
-            <Button
-              onClick={send}
-              disabled={loading || !input.trim()}
-              variant="ghost"
-              size="icon"
-              className="text-primary"
-            >
-              <Send className={`size-4 ${loading ? "animate-spin" : ""}`} />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </CustomBubbleBackground>
+    </>
   );
 }
