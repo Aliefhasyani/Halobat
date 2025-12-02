@@ -23,7 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ConfirmDelete from "@/components/ui/confirm-delete";
+import ConfirmDelete from "@/components/custom/confirm-delete";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {

@@ -10,6 +10,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
 
 // THIS IS RUNNING IN PRODUCTION. https://halobat-production.up.railway.app
@@ -26,6 +27,8 @@ Route::apiResource('users', UserController::class);
 // Profile endpoints for authenticated user
 Route::get('/profile', [ProfileController::class, 'show']);
 Route::put('/profile', [ProfileController::class, 'update']);
+// Upload endpoint for images. Protected by JWT middleware in controller.
+Route::post('/upload-image', [UploadController::class, 'uploadImage']);
 Route::apiResource('manufacturers', ManufacturerController::class);
 Route::apiResource('dosage-forms', DosageFormController::class);
 Route::apiResource('drugs', DrugController::class);
