@@ -25,8 +25,8 @@ return [
         'http://localhost:3000',
         'http://127.0.0.1:3000',
         // Production frontend origin (allow cookies / CSRF requests)
-        'https://halobat-frontend.up.railway.app/',
-        'https://halobat-production-1441.up.railway.app/',
+        'https://halobat-frontend.up.railway.app',
+        'https://halobat-production-1441.up.railway.app',
     ],
 
     'allowed_origins_patterns' => [],
