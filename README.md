@@ -6,7 +6,7 @@
 
 Proyek ini menggunakan arsitektur *Headless*, memisahkan **Backend API**  dan **Frontend** .
 
-##  Teknologi yang Digunakan
+
 
 
 
