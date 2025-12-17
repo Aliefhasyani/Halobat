@@ -9,10 +9,11 @@ type SearchParams = { id?: string; type?: string };
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: SearchParams;
+  searchParams?: Promise<SearchParams>;
 }) {
-  const id = searchParams?.id;
-  const type = searchParams?.type ?? "generic";
+  const params = await searchParams;
+  const id = params?.id;
+  const type = params?.type ?? "generic";
 
   if (!id) {
     return (
