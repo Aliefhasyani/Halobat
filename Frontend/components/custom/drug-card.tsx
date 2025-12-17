@@ -19,6 +19,7 @@ export type DrugCardProps = {
   picture?: string | null;
   manufacturer?: string | null;
   dosage?: string | null;
+  dosageForm?: string | null;
 };
 
 export function DrugCard({
@@ -29,6 +30,7 @@ export function DrugCard({
   picture,
   manufacturer,
   dosage,
+  dosageForm,
 }: DrugCardProps) {
   // fallback to a picsum photo when there's no picture supplied by backend
   const fallbackUrl = `https://picsum.photos/seed/${encodeURIComponent(
@@ -68,12 +70,19 @@ export function DrugCard({
               (type === "brand" ? "Branded" : "Generic")}
           </CardDescription>
         </div>
-        <div className="mt-3 flex items-center justify-between">
-          <div className="text-base font-semibold">
+        <div className="mt-3">
+          <div className="text-base font-semibold mb-2">
             {price ? `$${price}` : "—"}
           </div>
-          <div className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground capitalize">
-            {type}
+          <div className="flex flex-wrap gap-1.5">
+            <div className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground capitalize">
+              {type}
+            </div>
+            {dosageForm && (
+              <div className="text-xs px-2 py-0.5 bg-primary/10 rounded-full text-primary capitalize">
+                {dosageForm}
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
