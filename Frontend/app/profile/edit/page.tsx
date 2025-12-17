@@ -147,8 +147,8 @@ export default function ProfileEditPage() {
 
   if (loading)
     return (
-      <CustomBubbleBackground className="min-h-screen py-4">
-        <div className="p-4 max-w-2xl mx-auto">
+      <CustomBubbleBackground className="min-h-screen">
+        <div className="p-4 max-w-2xl mx-auto flex flex-col min-h-screen justify-center">
           <div className="mb-4">
             <Link
               href="/profile"
@@ -158,7 +158,7 @@ export default function ProfileEditPage() {
               <ArrowLeft className="h-4 w-4 text-pink-500" />
             </Link>
           </div>
-          <div className="p-6">
+          <div className="p-6 bg-card rounded-lg shadow">
             <h2 className="text-xl font-semibold">Edit Profile</h2>
             <div className="mt-4 space-y-4">
               <Skeleton className="h-6 w-64" />
@@ -184,8 +184,8 @@ export default function ProfileEditPage() {
     );
 
   return (
-    <CustomBubbleBackground className="min-h-screen py-4">
-      <div className="p-4 max-w-2xl mx-auto">
+    <CustomBubbleBackground className="min-h-screen">
+      <div className="p-4 max-w-2xl mx-auto flex flex-col min-h-screen justify-center">
         <div className="mb-4">
           <Link
             href="/profile"
@@ -195,7 +195,7 @@ export default function ProfileEditPage() {
             <ArrowLeft className="h-4 w-4 text-pink-500" />
           </Link>
         </div>
-        <div className="p-6">
+        <div className="p-6 bg-card rounded-lg shadow">
           <h2 className="text-xl font-semibold">Edit Profile</h2>
           <form onSubmit={handleSubmit} className="mt-4 space-y-4">
             <div>

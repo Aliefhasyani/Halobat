@@ -84,8 +84,8 @@ export default function ProfilePage() {
 
   if (loading)
     return (
-      <CustomBubbleBackground className="min-h-screen py-4">
-        <div className="p-4 max-w-2xl mx-auto">
+      <CustomBubbleBackground className="min-h-screen">
+        <div className="p-4 max-w-2xl mx-auto flex flex-col min-h-screen justify-center">
           <div className="mb-4">
             <Link
               href="/"
@@ -95,7 +95,7 @@ export default function ProfilePage() {
               <ArrowLeft className="h-4 w-4 text-pink-500" />
             </Link>
           </div>
-          <div className="p-6">
+          <div className="p-6 bg-card rounded-lg shadow">
             <div className="flex items-center gap-4">
               <Skeleton className="h-16 w-16 rounded-full" />
               <div className="flex-1">
@@ -122,8 +122,8 @@ export default function ProfilePage() {
 
   if (!user)
     return (
-      <CustomBubbleBackground className="min-h-screen py-4">
-        <div className="p-4 max-w-2xl mx-auto">
+      <CustomBubbleBackground className="min-h-screen">
+        <div className="p-4 max-w-2xl mx-auto flex flex-col min-h-screen justify-center">
           <div className="mb-4">
             <Link
               href="/"
@@ -134,15 +134,17 @@ export default function ProfilePage() {
             </Link>
           </div>
           <div className="p-4">
-            <p className="text-sm text-muted-foreground">No profile available.</p>
+            <p className="text-sm text-muted-foreground">
+              No profile available.
+            </p>
           </div>
         </div>
       </CustomBubbleBackground>
     );
 
   return (
-    <CustomBubbleBackground className="min-h-screen py-4">
-      <div className="p-4 max-w-2xl mx-auto">
+    <CustomBubbleBackground className="min-h-screen">
+      <div className="p-4 max-w-2xl mx-auto flex flex-col min-h-screen justify-center">
         <div className="mb-4">
           <Link
             href="/"
@@ -152,7 +154,7 @@ export default function ProfilePage() {
             <ArrowLeft className="h-4 w-4 text-pink-500" />
           </Link>
         </div>
-        <div className="p-6">
+        <div className="p-6 bg-card rounded-lg shadow">
           <div className="flex items-center gap-4">
             <Avatar>
               <AvatarImage src="" alt="User" />
@@ -166,7 +168,9 @@ export default function ProfilePage() {
             </Avatar>
             <div>
               <div className="text-lg font-semibold">{user.full_name}</div>
-              <div className="text-sm text-muted-foreground">@{user.username}</div>
+              <div className="text-sm text-muted-foreground">
+                @{user.username}
+              </div>
             </div>
           </div>
 
