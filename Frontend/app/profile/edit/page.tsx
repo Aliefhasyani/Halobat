@@ -2,10 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import CustomBubbleBackground from "@/components/custom/bubble-background";
 
 export default function ProfileEditPage() {
   const [fullName, setFullName] = useState("");
@@ -144,74 +147,100 @@ export default function ProfileEditPage() {
 
   if (loading)
     return (
-      <div className="p-6 max-w-2xl mx-auto">
-        <h2 className="text-xl font-semibold">Edit Profile</h2>
-        <div className="mt-4 space-y-4">
-          <Skeleton className="h-6 w-64" />
-          <Skeleton className="h-10 w-full rounded-md" />
+      <CustomBubbleBackground className="min-h-screen py-4">
+        <div className="p-4 max-w-2xl mx-auto">
+          <div className="mb-4">
+            <Link
+              href="/profile"
+              aria-label="Back"
+              className="inline-flex items-center p-2 md:p-4 rounded-full"
+            >
+              <ArrowLeft className="h-4 w-4 text-pink-500" />
+            </Link>
+          </div>
+          <div className="p-6">
+            <h2 className="text-xl font-semibold">Edit Profile</h2>
+            <div className="mt-4 space-y-4">
+              <Skeleton className="h-6 w-64" />
+              <Skeleton className="h-10 w-full rounded-md" />
 
-          <Skeleton className="h-6 w-64" />
-          <Skeleton className="h-10 w-full rounded-md" />
+              <Skeleton className="h-6 w-64" />
+              <Skeleton className="h-10 w-full rounded-md" />
 
-          <Skeleton className="h-6 w-64" />
-          <Skeleton className="h-10 w-full rounded-md" />
+              <Skeleton className="h-6 w-64" />
+              <Skeleton className="h-10 w-full rounded-md" />
 
-          <Skeleton className="h-6 w-80 mt-2" />
-          <Skeleton className="h-10 w-full rounded-md" />
+              <Skeleton className="h-6 w-80 mt-2" />
+              <Skeleton className="h-10 w-full rounded-md" />
 
-          <div className="flex gap-2 mt-4">
-            <Skeleton className="h-10 w-24 rounded-md" />
-            <Skeleton className="h-10 w-24 rounded-md" />
+              <div className="flex gap-2 mt-4">
+                <Skeleton className="h-10 w-24 rounded-md" />
+                <Skeleton className="h-10 w-24 rounded-md" />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </CustomBubbleBackground>
     );
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h2 className="text-xl font-semibold">Edit Profile</h2>
-      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-        <div>
-          <Label>Full name</Label>
-          <Input
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <Label>Username</Label>
-          <Input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <Label>Email</Label>
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} />
-        </div>
-
-        <div>
-          <Label>Password (leave blank to keep current)</Label>
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <Button type="submit">Save</Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => router.push("/profile")}
+    <CustomBubbleBackground className="min-h-screen py-4">
+      <div className="p-4 max-w-2xl mx-auto">
+        <div className="mb-4">
+          <Link
+            href="/profile"
+            aria-label="Back"
+            className="inline-flex items-center p-2 md:p-4 rounded-full"
           >
-            Cancel
-          </Button>
+            <ArrowLeft className="h-4 w-4 text-pink-500" />
+          </Link>
         </div>
-      </form>
-    </div>
+        <div className="p-6">
+          <h2 className="text-xl font-semibold">Edit Profile</h2>
+          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+            <div>
+              <Label>Full name</Label>
+              <Input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label>Username</Label>
+              <Input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label>Email</Label>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+
+            <div>
+              <Label>Password (leave blank to keep current)</Label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button type="submit">Save</Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => router.push("/profile")}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </CustomBubbleBackground>
   );
 }
