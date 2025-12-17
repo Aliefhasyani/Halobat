@@ -51,7 +51,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar showSearch value={search} onSearch={setSearch} />
+      <div className="sticky top-0 z-50 bg-background">
+        <Navbar showSearch value={search} onSearch={setSearch} />
+      </div>
 
       <main className="max-w-[1200px] mx-auto p-6 md:p-10">
         <h1 className="text-2xl font-semibold mb-4">Discover Medicines</h1>
