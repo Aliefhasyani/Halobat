@@ -66,7 +66,7 @@ export default function Navbar({
   }
 
   return (
-    <header className="w-full border-b h-16 flex items-center px-6">
+    <header className="w-full border-b h-16 flex items-center px-6 bg-card">
       <div className="flex items-center gap-4 w-full max-w-[1200px] mx-auto">
         <Link href="/" className="flex items-center">
           <Image
@@ -90,7 +90,7 @@ export default function Navbar({
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 ml-auto">
           {!isAuthenticated && (
             <>
               <Link href="/auth/login">

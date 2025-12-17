@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import CustomBubbleBackground from "@/components/custom/bubble-background";
+import Navbar from "@/components/custom/navbar";
 // page no longer uses the shared DrugCard preview — render a product-style layout
 
 type SearchParams = { id?: string; type?: string };
@@ -19,6 +20,7 @@ export default async function Page({
   if (!id) {
     return (
       <CustomBubbleBackground className="min-h-screen py-4">
+        <Navbar showSearch={false} />
         <div className="p-8">
           <h2 className="text-lg font-semibold">No drug id provided</h2>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -60,6 +62,7 @@ export default async function Page({
     if (!item) {
       return (
         <CustomBubbleBackground className="min-h-screen py-4">
+          <Navbar showSearch={false} />
           <div className="p-8">
             <h2 className="text-lg font-semibold">Item not found</h2>
           </div>
@@ -82,7 +85,8 @@ export default async function Page({
       : item.dosageForm?.name ?? item.dosage_form_data?.name;
 
     return (
-      <CustomBubbleBackground className="min-h-screen py-4">
+      <CustomBubbleBackground className="min-h-screen">
+        <Navbar showSearch={false} />
         <div className="p-4 max-w-4xl mx-auto">
           <div className="mb-4 flex items-start justify-between">
             <div>
@@ -199,6 +203,7 @@ export default async function Page({
     const msg = (err as Error)?.message ?? "Unknown error";
     return (
       <CustomBubbleBackground className="min-h-screen py-4">
+        <Navbar showSearch={false} />
         <div className="p-8">
           <h2 className="text-lg font-semibold">Error loading drug</h2>
           <p className="mt-2 text-sm text-destructive">{msg}</p>
