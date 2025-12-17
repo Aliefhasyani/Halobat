@@ -132,11 +132,14 @@ export function AppSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={false}>
-                  <a href="#">
+                <SidebarMenuButton
+                  asChild
+                  isActive={activeMenu === "diagnoses"}
+                >
+                  <button onClick={() => onMenuClick("diagnoses")}>
                     <Heart className="w-4 h-4" />
                     Diagnoses
-                  </a>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
