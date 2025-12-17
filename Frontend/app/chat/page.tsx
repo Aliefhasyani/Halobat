@@ -26,6 +26,14 @@ type Message = {
   recommendedDrugs?: Recommendation[];
 };
 
+type DiagnosisHistory = {
+  id: string;
+  symptoms: string;
+  diagnosis: string;
+  created_at: string;
+  recommended_drugs: Recommendation[];
+};
+
 export default function ChatPage() {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -35,7 +43,72 @@ export default function ChatPage() {
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => setMessages([]), []);
+  // Load chat history on mount
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          return;
+        }
+
+        const apiUrl =
+          (process.env.NEXT_PUBLIC_BASE_URL &&
+            `${process.env.NEXT_PUBLIC_BASE_URL.replace(/\/$/, "")}/api/chat`) ||
+          "/api/chat";
+
+        const resp = await fetch(apiUrl, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!resp.ok) {
+          console.warn("Failed to load chat history");
+          return;
+        }
+
+        const body = await resp.json();
+        if (body.success && Array.isArray(body.history)) {
+          const msgs: Message[] = [];
+          
+          body.history.forEach((item: DiagnosisHistory) => {
+            // Add user message (symptoms)
+            msgs.push({
+              id: `${item.id}-user`,
+              sender: "user",
+              text: item.symptoms || "",
+            });
+
+            // Add assistant message (diagnosis)
+            msgs.push({
+              id: `${item.id}-assistant`,
+              sender: "assistant",
+              text: item.diagnosis || "",
+            });
+
+            // Add recommended drugs if any
+            if (item.recommended_drugs && item.recommended_drugs.length > 0) {
+              msgs.push({
+                id: `${item.id}-drugs`,
+                sender: "assistant",
+                text: "",
+                recommendedDrugs: item.recommended_drugs,
+              });
+            }
+          });
+
+          setMessages(msgs);
+        }
+      } catch (err) {
+        console.error("Error loading chat history:", err);
+      }
+    }
+
+    loadHistory();
+  }, []);
 
   useEffect(() => {
     const el = messagesRef.current;
@@ -72,15 +145,57 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, skeletonMessage]);
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Please log in to use the chat feature");
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === skeletonId
+              ? {
+                  id: String(Date.now()) + "-err",
+                  sender: "assistant",
+                  text: "Please log in to use the chat feature.",
+                  loading: false,
+                }
+              : m
+          )
+        );
+        setLoading(false);
+        return;
+      }
+
       const apiUrl =
         (process.env.NEXT_PUBLIC_BASE_URL &&
           `${process.env.NEXT_PUBLIC_BASE_URL.replace(/\/$/, "")}/api/chat`) ||
         "/api/chat";
       const resp = await fetch(apiUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ message: text }),
       });
+      if (resp.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user_id");
+        setError("Session expired. Please log in again.");
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === skeletonId
+              ? {
+                  id: String(Date.now()) + "-err",
+                  sender: "assistant",
+                  text: "Your session has expired. Please log in again.",
+                  loading: false,
+                }
+              : m
+          )
+        );
+        setTimeout(() => router.push("/auth/login"), 2000);
+        setLoading(false);
+        return;
+      }
       if (!resp.ok) throw new Error((await resp.text()) || "Unknown error");
       const body = await resp.json();
 

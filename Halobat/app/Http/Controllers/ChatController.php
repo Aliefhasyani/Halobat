@@ -8,10 +8,61 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Diagnosis;
 use App\Models\Drug;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ChatController extends Controller
 {
-    public function index(Request $request){
+    public function __construct()
+    {
+        $this->middleware('jwt.auth');
+    }
+
+    /**
+     * Retrieve chat history (diagnoses) for the authenticated user.
+     */
+    public function index(Request $request)
+    {
+        $user = JWTAuth::user();
+        
+        if (!$user) {
+            return response()->json(['success' => false, 'error' => 'Authentication required'], 401);
+        }
+
+        // Retrieve all diagnoses for this user with recommended drugs
+        $diagnoses = Diagnosis::where('user_id', $user->id)
+            ->with(['recommendedDrugs.manufacturer'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $history = $diagnoses->map(function ($diagnosis) {
+            return [
+                'id' => $diagnosis->id,
+                'symptoms' => $diagnosis->symptoms,
+                'diagnosis' => $diagnosis->diagnosis,
+                'created_at' => $diagnosis->created_at,
+                'recommended_drugs' => $diagnosis->recommendedDrugs->map(function ($drug) {
+                    return [
+                        'id' => $drug->id,
+                        'name' => $drug->generic_name,
+                        'price' => $drug->price,
+                        'picture' => $drug->picture,
+                        'manufacturer' => $drug->manufacturer ? $drug->manufacturer->name : null,
+                        'quantity' => $drug->pivot->quantity,
+                    ];
+                })->toArray(),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'history' => $history,
+        ]);
+    }
+
+    /**
+     * Store a new diagnosis based on user symptoms.
+     */
+    public function store(Request $request){
         $validated = $request->validate([
             'message' => 'required|string',
         ]);
@@ -110,10 +161,10 @@ PROMPT;
                     return response()->json(['success' => false, 'error' => 'Unable to parse LLM response: ' . substr($answer ?? '', 0, 100)], 500);
                 }
 
-                // choose a user id: prefer authenticated user, else fall back to first user
-                $user = $request->user() ?? User::first();
+                // Get authenticated user
+                $user = JWTAuth::user();
                 if (!$user) {
-                    return response()->json(['success' => false, 'error' => 'No authenticated user and no fallback user found'], 500);
+                    return response()->json(['success' => false, 'error' => 'Authentication required'], 401);
                 }
 
                 DB::beginTransaction();

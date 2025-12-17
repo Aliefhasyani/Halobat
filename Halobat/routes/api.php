@@ -21,7 +21,8 @@ Route::post('/register',[AuthController::class,'register'])->name('register');
 Route::post('/login',[AuthController::class,'login'])->name('login');
 Route::post('/logout',[AuthController::class,'logout'])->middleware('jwt.auth')->name('logout');
 
-Route::post('/chat', [ChatController::class, 'index'])->name('chat');
+Route::get('/chat', [ChatController::class, 'index'])->middleware('jwt.auth')->name('chat.index');
+Route::post('/chat', [ChatController::class, 'store'])->middleware('jwt.auth')->name('chat.store');
 
 Route::apiResource('roles', RoleController::class);
 Route::apiResource('users', UserController::class);
