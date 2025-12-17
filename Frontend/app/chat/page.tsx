@@ -40,6 +40,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showWarning, setShowWarning] = useState(false);
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
@@ -54,7 +55,10 @@ export default function ChatPage() {
 
         const apiUrl =
           (process.env.NEXT_PUBLIC_BASE_URL &&
-            `${process.env.NEXT_PUBLIC_BASE_URL.replace(/\/$/, "")}/api/chat`) ||
+            `${process.env.NEXT_PUBLIC_BASE_URL.replace(
+              /\/$/,
+              ""
+            )}/api/chat`) ||
           "/api/chat";
 
         const resp = await fetch(apiUrl, {
@@ -73,7 +77,6 @@ export default function ChatPage() {
         const body = await resp.json();
         if (body.success && Array.isArray(body.history)) {
           const msgs: Message[] = [];
-          
           body.history.forEach((item: DiagnosisHistory) => {
             // Add user message (symptoms)
             msgs.push({
@@ -363,7 +366,13 @@ export default function ChatPage() {
 
         <div className="fixed left-1/2 bottom-6 z-40 w-[min(96%,1100px)] -translate-x-1/2">
           <div className="max-w-[800px] mx-auto">
-            <div className="mb-4 border border-rose-200 bg-rose-50/60 px-4 py-3 rounded-lg flex items-start gap-4">
+            <div
+              className={`mb-4 border border-rose-200 bg-rose-50/80 px-4 rounded-lg flex items-start gap-4 overflow-hidden transition-all duration-300 ease-in-out ${
+                showWarning
+                  ? "py-3 opacity-100 max-h-32"
+                  : "py-0 opacity-0 max-h-0"
+              }`}
+            >
               <div className="text-2xl text-rose-500"></div>
               <div className="text-sm text-rose-700">
                 Informasi dari AI ini bukan pengganti konsultasi dokter. Selalu
@@ -375,6 +384,8 @@ export default function ChatPage() {
                 placeholder="Tanyakan apapun kepada saya !"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onFocus={() => setShowWarning(true)}
+                onBlur={() => setShowWarning(false)}
                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
