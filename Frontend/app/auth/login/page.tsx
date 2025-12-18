@@ -42,7 +42,17 @@ export default function Page() {
   return (
     <div className="relative flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       {/* bubble background is now a positioned child so it won't affect layout sizing */}
-      <BubbleBackground className="absolute inset-0 pointer-events-none bg-primary" />
+      <BubbleBackground
+        className="absolute inset-0 pointer-events-none bg-primary"
+        colors={{
+          first: "255,200,230",
+          second: "255,200,230",
+          third: "255,200,230",
+          fourth: "255,200,230",
+          fifth: "255,200,230",
+          sixth: "255,200,230",
+        }}
+      />
 
       {/* page content sits above the background */}
       <div className="relative z-10 w-full max-w-sm">
