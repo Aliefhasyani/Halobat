@@ -94,7 +94,7 @@ export default function Navbar({
           {!isAuthenticated && (
             <>
               <Link href="/auth/login">
-                <Button variant="ghost" size="sm">
+                <Button variant="outline" size="sm">
                   Login
                 </Button>
               </Link>
