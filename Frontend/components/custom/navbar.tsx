@@ -79,7 +79,7 @@ export default function Navbar({
         </Link>
 
         {showSearch && (
-          <div className="flex-1 relative">
+          <div className="relative w-full max-w-md mx-auto">
             <Search className="absolute top-1/2 left-3 -translate-y-1/2 opacity-50 size-4" />
             <Input
               value={search}
