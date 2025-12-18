@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 type Drug = {
@@ -35,8 +34,6 @@ export default function Home() {
   const [filterType, setFilterType] = useState<string>("all");
   const [filterManufacturer, setFilterManufacturer] = useState<string>("all");
   const [filterDosageForm, setFilterDosageForm] = useState<string>("all");
-  const [priceMin, setPriceMin] = useState<string>("");
-  const [priceMax, setPriceMax] = useState<string>("");
 
   useEffect(() => {
     const fetchDrugs = async () => {
@@ -99,43 +96,18 @@ export default function Home() {
       );
     }
 
-    // Price filter
-    const minPrice = priceMin ? parseFloat(priceMin) : null;
-    const maxPrice = priceMax ? parseFloat(priceMax) : null;
-    if (minPrice !== null || maxPrice !== null) {
-      result = result.filter((d) => {
-        const price = d.price ? parseFloat(String(d.price)) : null;
-        if (price === null) return false;
-        if (minPrice !== null && price < minPrice) return false;
-        if (maxPrice !== null && price > maxPrice) return false;
-        return true;
-      });
-    }
-
     return result;
-  }, [
-    data,
-    search,
-    filterType,
-    filterManufacturer,
-    filterDosageForm,
-    priceMin,
-    priceMax,
-  ]);
+  }, [data, search, filterType, filterManufacturer, filterDosageForm]);
 
   const hasActiveFilters =
     filterType !== "all" ||
     filterManufacturer !== "all" ||
-    filterDosageForm !== "all" ||
-    priceMin !== "" ||
-    priceMax !== "";
+    filterDosageForm !== "all";
 
   const clearFilters = () => {
     setFilterType("all");
     setFilterManufacturer("all");
     setFilterDosageForm("all");
-    setPriceMin("");
-    setPriceMax("");
   };
 
   return (
@@ -162,7 +134,7 @@ export default function Home() {
                 </Button>
               )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {/* Type Filter */}
               <div>
                 <label className="text-xs text-muted-foreground mb-1 block">
@@ -225,38 +197,6 @@ export default function Home() {
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Price Min Filter */}
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">
-                  Min Price
-                </label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={priceMin}
-                  onChange={(e) => setPriceMin(e.target.value)}
-                  className="h-9"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-
-              {/* Price Max Filter */}
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">
-                  Max Price
-                </label>
-                <Input
-                  type="number"
-                  placeholder="∞"
-                  value={priceMax}
-                  onChange={(e) => setPriceMax(e.target.value)}
-                  className="h-9"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
             </div>
           </div>
         )}
@@ -286,8 +226,6 @@ export default function Home() {
                       filterType !== "all",
                       filterManufacturer !== "all",
                       filterDosageForm !== "all",
-                      priceMin !== "",
-                      priceMax !== "",
                     ].filter(Boolean).length
                   }
                 </span>
