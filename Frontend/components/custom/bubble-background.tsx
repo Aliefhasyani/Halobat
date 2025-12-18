@@ -14,16 +14,15 @@ export default function CustomBubbleBackground({
   return (
     <BubbleBackground
       className={className}
-      // primary = white background, secondary = soft pastel for bubbles
+      // primary = white background, first 3 bubbles pink, last 3 green
       primary="#ffffff"
-      secondary="255,200,230"
       colors={{
-        first: "255,230,240",
-        second: "200,240,220",
-        third: "200,220,255",
-        fourth: "240,200,220",
-        fifth: "240,230,200",
-        sixth: "220,210,245",
+        first: "11,85,26",
+        second: "255,200,230",
+        third: "255,200,230",
+        fourth: "255,200,230",
+        fifth: "11,85,26",
+        sixth: "11,85,26",
       }}
       interactive={false}
     >

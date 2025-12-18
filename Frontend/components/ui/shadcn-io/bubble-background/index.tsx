@@ -117,26 +117,44 @@ function BubbleBackground({
                     : `var(--primary, ${convertToCssColor(colors.first)})`
                 };
 
-                /* Bubbles color: prefer secondary prop, then colors.second from the
-                  registry, then app --secondary. This variable will contain either
-                  a full color function (like oklch(...)) or a rgb(...) string, so
-                  gradients below will use it directly and element opacity will
-                  control overall translucency. */
+                /* Bubbles color: prefer secondary prop for all bubbles, or use individual colors */
                 --bubble-color: ${
                   secondary
                     ? convertToCssColor(secondary)
                     : `var(--secondary, ${convertToCssColor(colors.second)})`
                 };
 
-              /* Backwards compat: expose older variables (the component previously used
-                 --first-color..--sixth-color). Map them to the same bubble color so
-                 existing rules remain consistent. */
-              --first-color: var(--bubble-color);
-              --second-color: var(--bubble-color);
-              --third-color: var(--bubble-color);
-              --fourth-color: var(--bubble-color);
-              --fifth-color: var(--bubble-color);
-              --sixth-color: var(--bubble-color);
+              /* Individual bubble colors: use secondary if provided, otherwise use colors object */
+              --first-color: ${
+                secondary
+                  ? "var(--bubble-color)"
+                  : convertToCssColor(colors.first)
+              };
+              --second-color: ${
+                secondary
+                  ? "var(--bubble-color)"
+                  : convertToCssColor(colors.second)
+              };
+              --third-color: ${
+                secondary
+                  ? "var(--bubble-color)"
+                  : convertToCssColor(colors.third)
+              };
+              --fourth-color: ${
+                secondary
+                  ? "var(--bubble-color)"
+                  : convertToCssColor(colors.fourth)
+              };
+              --fifth-color: ${
+                secondary
+                  ? "var(--bubble-color)"
+                  : convertToCssColor(colors.fifth)
+              };
+              --sixth-color: ${
+                secondary
+                  ? "var(--bubble-color)"
+                  : convertToCssColor(colors.sixth)
+              };
             }
           `}
       </style>
@@ -172,7 +190,7 @@ function BubbleBackground({
         }}
       >
         <motion.div
-          className="absolute rounded-full size-[80%] top-[10%] left-[10%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,var(--first-color)_0%,transparent_50%)] opacity-80"
+          className="absolute rounded-full size-[80%] top-[10%] left-[10%] bg-[radial-gradient(circle_at_center,var(--first-color)_0%,transparent_50%)] opacity-80"
           animate={{ y: [-50, 50, -50] }}
           transition={{ duration: 30, ease: "easeInOut", repeat: Infinity }}
         />
@@ -187,7 +205,7 @@ function BubbleBackground({
             repeatType: "loop",
           }}
         >
-          <div className="rounded-full size-[80%] top-[10%] left-[10%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,var(--second-color)_0%,transparent_50%)] opacity-80" />
+          <div className="rounded-full size-[80%] top-[10%] left-[10%] bg-[radial-gradient(circle_at_center,var(--second-color)_0%,transparent_50%)] opacity-80" />
         </motion.div>
 
         <motion.div
@@ -195,11 +213,11 @@ function BubbleBackground({
           animate={{ rotate: 360 }}
           transition={{ duration: 40, ease: "linear", repeat: Infinity }}
         >
-          <div className="absolute rounded-full size-[80%] bg-[radial-gradient(circle_at_center,var(--third-color)_0%,transparent_50%)] mix-blend-hard-light top-[calc(50%+200px)] left-[calc(50%-500px)] opacity-80" />
+          <div className="absolute rounded-full size-[80%] bg-[radial-gradient(circle_at_center,var(--third-color)_0%,transparent_50%)] top-[calc(50%+200px)] left-[calc(50%-500px)] opacity-80" />
         </motion.div>
 
         <motion.div
-          className="absolute rounded-full size-[80%] top-[10%] left-[10%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,var(--fourth-color)_0%,transparent_50%)] opacity-70"
+          className="absolute rounded-full size-[80%] top-[10%] left-[10%] bg-[radial-gradient(circle_at_center,var(--fourth-color)_0%,transparent_50%)] opacity-70"
           animate={{ x: [-50, 50, -50] }}
           transition={{ duration: 40, ease: "easeInOut", repeat: Infinity }}
         />
@@ -209,12 +227,12 @@ function BubbleBackground({
           animate={{ rotate: 360 }}
           transition={{ duration: 20, ease: "linear", repeat: Infinity }}
         >
-          <div className="absolute rounded-full size-[160%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,var(--fifth-color)_0%,transparent_50%)] top-[calc(50%-80%)] left-[calc(50%-80%)] opacity-80" />
+          <div className="absolute rounded-full size-[160%] bg-[radial-gradient(circle_at_center,var(--fifth-color)_0%,transparent_50%)] top-[calc(50%-80%)] left-[calc(50%-80%)] opacity-80" />
         </motion.div>
 
         {interactive && (
           <motion.div
-            className="absolute rounded-full size-full mix-blend-hard-light bg-[radial-gradient(circle_at_center,var(--sixth-color)_0%,transparent_50%)] opacity-70"
+            className="absolute rounded-full size-full bg-[radial-gradient(circle_at_center,var(--sixth-color)_0%,transparent_50%)] opacity-70"
             style={{
               x: springX,
               y: springY,

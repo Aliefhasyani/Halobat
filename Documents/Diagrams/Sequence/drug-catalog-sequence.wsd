@@ -2,7 +2,6 @@
 actor User
 participant System
 participant Database
-participant AI
 
 == View Drug Details ==
 User -> System: Select drug to view details

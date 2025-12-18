@@ -2,9 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import CustomBubbleBackground from "@/components/custom/bubble-background";
 
 interface User {
   id: string;
@@ -81,71 +84,114 @@ export default function ProfilePage() {
 
   if (loading)
     return (
-      <div className="p-6 max-w-2xl mx-auto">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-16 w-16 rounded-full" />
-          <div className="flex-1">
-            <Skeleton className="h-5 w-48 mb-2" />
-            <Skeleton className="h-4 w-32" />
+      <CustomBubbleBackground className="min-h-screen">
+        <div className="p-4 max-w-2xl mx-auto flex flex-col min-h-screen justify-center">
+          <div className="mb-4">
+            <Link
+              href="/"
+              aria-label="Back"
+              className="inline-flex items-center p-2 md:p-4 rounded-full"
+            >
+              <ArrowLeft className="h-4 w-4 text-pink-500" />
+            </Link>
+          </div>
+          <div className="p-6 bg-card rounded-lg shadow">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-16 w-16 rounded-full" />
+              <div className="flex-1">
+                <Skeleton className="h-5 w-48 mb-2" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-4 w-full" />
+
+              <Skeleton className="h-4 w-40 mt-4" />
+              <Skeleton className="h-4 w-56" />
+            </div>
+
+            <div className="mt-6">
+              <Skeleton className="h-10 w-28 rounded-md" />
+            </div>
           </div>
         </div>
-
-        <div className="mt-6 space-y-4">
-          <Skeleton className="h-4 w-40" />
-          <Skeleton className="h-4 w-full" />
-
-          <Skeleton className="h-4 w-40 mt-4" />
-          <Skeleton className="h-4 w-56" />
-        </div>
-
-        <div className="mt-6">
-          <Skeleton className="h-10 w-28 rounded-md" />
-        </div>
-      </div>
+      </CustomBubbleBackground>
     );
 
   if (!user)
     return (
-      <div className="p-4">
-        <p className="text-sm text-muted-foreground">No profile available.</p>
-      </div>
+      <CustomBubbleBackground className="min-h-screen">
+        <div className="p-4 max-w-2xl mx-auto flex flex-col min-h-screen justify-center">
+          <div className="mb-4">
+            <Link
+              href="/"
+              aria-label="Back"
+              className="inline-flex items-center p-2 md:p-4 rounded-full"
+            >
+              <ArrowLeft className="h-4 w-4 text-pink-500" />
+            </Link>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-muted-foreground">
+              No profile available.
+            </p>
+          </div>
+        </div>
+      </CustomBubbleBackground>
     );
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <div className="flex items-center gap-4">
-        <Avatar>
-          <AvatarImage src="" alt="User" />
-          <AvatarFallback>
-            {user.full_name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <div>
-          <div className="text-lg font-semibold">{user.full_name}</div>
-          <div className="text-sm text-muted-foreground">@{user.username}</div>
+    <CustomBubbleBackground className="min-h-screen">
+      <div className="p-4 max-w-2xl mx-auto flex flex-col min-h-screen justify-center">
+        <div className="mb-4">
+          <Link
+            href="/"
+            aria-label="Back"
+            className="inline-flex items-center p-2 md:p-4 rounded-full"
+          >
+            <ArrowLeft className="h-4 w-4 text-pink-500" />
+          </Link>
         </div>
-      </div>
+        <div className="p-6 bg-card rounded-lg shadow">
+          <div className="flex items-center gap-4">
+            <Avatar>
+              <AvatarImage src="" alt="User" />
+              <AvatarFallback>
+                {user.full_name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="text-lg font-semibold">{user.full_name}</div>
+              <div className="text-sm text-muted-foreground">
+                @{user.username}
+              </div>
+            </div>
+          </div>
 
-      <div className="mt-6 space-y-2">
-        <div>
-          <div className="text-sm text-muted-foreground">Email</div>
-          <div className="font-medium">{user.email}</div>
-        </div>
-        <div>
-          <div className="text-sm text-muted-foreground">Role</div>
-          <div className="font-medium">{user.role}</div>
-        </div>
-      </div>
+          <div className="mt-6 space-y-2">
+            <div>
+              <div className="text-sm text-muted-foreground">Email</div>
+              <div className="font-medium">{user.email}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Role</div>
+              <div className="font-medium">{user.role}</div>
+            </div>
+          </div>
 
-      <div className="mt-6">
-        <Button onClick={() => router.push("/profile/edit")}>
-          Edit Profile
-        </Button>
+          <div className="mt-6">
+            <Button onClick={() => router.push("/profile/edit")}>
+              Edit Profile
+            </Button>
+          </div>
+        </div>
       </div>
-    </div>
+    </CustomBubbleBackground>
   );
 }

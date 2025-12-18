@@ -23,8 +23,8 @@ loop for each recommended drug
 end
 System --> User: Display available recommended drugs from recommended_drugs table
 
-User -> System: View recommended drugs
-System -> Database: Query recommended_drugs and join with drugs
-Database --> System: Return recommended drug list
-System --> User: Display recommended drug list
+User -> System: View recommended drug
+System -> Database: Query recommended drug
+Database --> System: Return recommended drug
+System --> User: Display recommended drug
 @enduml

@@ -28,10 +28,32 @@ export default function Navbar({
   const [search, setSearch] = useState(value ?? "");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [name, setName] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsAuthenticated(!!localStorage.getItem("token"));
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
     setName(localStorage.getItem("username"));
+
+    // Fetch user role from API if authenticated
+    if (token) {
+      (async () => {
+        try {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/profile`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          const json = await res.json();
+          if (json.success) {
+            setRole(json.data.role?.toLowerCase() || null);
+          }
+        } catch (err) {
+          console.warn("Failed to fetch user role:", err);
+        }
+      })();
+    }
   }, []);
 
   useEffect(() => {
@@ -44,7 +66,7 @@ export default function Navbar({
   }
 
   return (
-    <header className="w-full border-b h-16 flex items-center px-6">
+    <header className="w-full border-b h-16 flex items-center px-6 bg-card">
       <div className="flex items-center gap-4 w-full max-w-[1200px] mx-auto">
         <Link href="/" className="flex items-center">
           <Image
@@ -57,7 +79,7 @@ export default function Navbar({
         </Link>
 
         {showSearch && (
-          <div className="flex-1 relative">
+          <div className="relative w-full max-w-md mx-auto">
             <Search className="absolute top-1/2 left-3 -translate-y-1/2 opacity-50 size-4" />
             <Input
               value={search}
@@ -68,11 +90,11 @@ export default function Navbar({
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 ml-auto">
           {!isAuthenticated && (
             <>
               <Link href="/auth/login">
-                <Button variant="ghost" size="sm">
+                <Button variant="outline" size="sm">
                   Login
                 </Button>
               </Link>
@@ -96,6 +118,11 @@ export default function Navbar({
                 <DropdownMenuItem asChild>
                   <Link href="/profile">Profile</Link>
                 </DropdownMenuItem>
+                {(role === "admin" || role === "superadmin") && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard">Dashboard</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <a
                     href="#"

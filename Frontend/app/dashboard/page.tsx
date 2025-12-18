@@ -11,6 +11,7 @@ import { DrugsDatatable } from "./drugs/drugs-datatable";
 import { ManufacturersDatatable } from "./manufacturers/manufacturers-datatable";
 import { DosageFormsDatatable } from "./dosage-forms/dosage-forms-datatable";
 import { ActiveIngredientsDatatable } from "./active-ingredients/active-ingredients-datatable";
+import { DiagnosesDatatable } from "./diagnoses/diagnoses-datatable";
 
 export default function Page() {
   const router = useRouter();
@@ -61,6 +62,7 @@ export default function Page() {
           {activeMenu === "active-ingredients" && (
             <ActiveIngredientsDatatable />
           )}
+          {activeMenu === "diagnoses" && <DiagnosesDatatable />}
         </div>
       </SidebarInset>
     </SidebarProvider>

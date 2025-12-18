@@ -3,6 +3,7 @@
 use App\Http\Controllers\ActiveIngredientController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\DiagnosisController;
 use App\Http\Controllers\DosageFormController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\ManufacturerController;
@@ -20,7 +21,8 @@ Route::post('/register',[AuthController::class,'register'])->name('register');
 Route::post('/login',[AuthController::class,'login'])->name('login');
 Route::post('/logout',[AuthController::class,'logout'])->middleware('jwt.auth')->name('logout');
 
-Route::post('/chat', [ChatController::class, 'index'])->name('chat');
+Route::get('/chat', [ChatController::class, 'index'])->middleware('jwt.auth')->name('chat.index');
+Route::post('/chat', [ChatController::class, 'store'])->middleware('jwt.auth')->name('chat.store');
 
 Route::apiResource('roles', RoleController::class);
 Route::apiResource('users', UserController::class);
@@ -34,3 +36,4 @@ Route::apiResource('dosage-forms', DosageFormController::class);
 Route::apiResource('drugs', DrugController::class);
 Route::apiResource('brands', BrandController::class);
 Route::apiResource('active-ingredients', ActiveIngredientController::class);
+Route::apiResource('diagnoses', DiagnosisController::class);

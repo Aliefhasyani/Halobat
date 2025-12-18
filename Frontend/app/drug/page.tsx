@@ -2,6 +2,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import CustomBubbleBackground from "@/components/custom/bubble-background";
+import Navbar from "@/components/custom/navbar";
 // page no longer uses the shared DrugCard preview — render a product-style layout
 
 type SearchParams = { id?: string; type?: string };
@@ -9,19 +11,23 @@ type SearchParams = { id?: string; type?: string };
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: SearchParams;
+  searchParams?: Promise<SearchParams>;
 }) {
-  const id = searchParams?.id;
-  const type = searchParams?.type ?? "generic";
+  const params = await searchParams;
+  const id = params?.id;
+  const type = params?.type ?? "generic";
 
   if (!id) {
     return (
-      <div className="p-8">
-        <h2 className="text-lg font-semibold">No drug id provided</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Open a drug from a list by clicking &quot;View&quot;.
-        </p>
-      </div>
+      <CustomBubbleBackground className="min-h-screen py-4">
+        <Navbar showSearch={false} />
+        <div className="p-8">
+          <h2 className="text-lg font-semibold">No drug id provided</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Open a drug from a list by clicking &quot;View&quot;.
+          </p>
+        </div>
+      </CustomBubbleBackground>
     );
   }
 
@@ -55,9 +61,12 @@ export default async function Page({
 
     if (!item) {
       return (
-        <div className="p-8">
-          <h2 className="text-lg font-semibold">Item not found</h2>
-        </div>
+        <CustomBubbleBackground className="min-h-screen py-4">
+          <Navbar showSearch={false} />
+          <div className="p-8">
+            <h2 className="text-lg font-semibold">Item not found</h2>
+          </div>
+        </CustomBubbleBackground>
       );
     }
 
@@ -76,121 +85,130 @@ export default async function Page({
       : item.dosageForm?.name ?? item.dosage_form_data?.name;
 
     return (
-      <div className="p-4 max-w-4xl mx-auto">
-        <div className="mb-4 flex items-start justify-between">
-          <div>
-            <Link
-              href="/"
-              aria-label="Back"
-              className="inline-flex items-center p-2 md:p-4 rounded-full"
-            >
-              <ArrowLeft className="h-4 w-4 text-pink-500" />
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          <div className="w-full bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center p-4 md:p-8">
-            {/* Large image on the left (e-commerce style) */}
-            {/* server-side fallback URL; no client event handlers in this server component */}
-            <Image
-              src={
-                picture ??
-                `https://picsum.photos/seed/${encodeURIComponent(id)}/800/800`
-              }
-              alt={name ?? "product image"}
-              width={800}
-              height={800}
-              unoptimized
-              className="w-full max-w-md h-auto object-contain rounded-lg shadow-sm"
-            />
+      <CustomBubbleBackground className="min-h-screen">
+        <Navbar showSearch={false} />
+        <div className="p-4 max-w-4xl mx-auto">
+          <div className="mb-4 flex items-start justify-between">
+            <div>
+              <Link
+                href="/"
+                aria-label="Back"
+                className="inline-flex items-center p-2 md:p-4 rounded-full"
+              >
+                <ArrowLeft className="h-4 w-4 text-pink-500" />
+              </Link>
+            </div>
           </div>
 
-          <div className="bg-card p-6 rounded-lg">
-            {/* Duplicate header info here so details column also contains the title/manufacturer */}
-            <div className="mb-4 text-left">
-              <h1 className="text-2xl font-bold">{name}</h1>
-              <div className="mt-1 text-sm text-muted-foreground">
-                {manufacturer || dosage}
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start bg-card p-6 rounded-lg shadow-sm">
+            <div className="w-full bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center">
+              {/* Large image on the left (e-commerce style) */}
+              {/* server-side fallback URL; no client event handlers in this server component */}
+              <Image
+                src={
+                  picture ??
+                  `https://picsum.photos/seed/${encodeURIComponent(id)}/800/800`
+                }
+                alt={name ?? "product image"}
+                width={800}
+                height={800}
+                unoptimized
+                className="w-full max-w-md h-auto object-contain rounded-lg shadow-sm"
+              />
             </div>
 
-            <h2 className="text-lg font-semibold">Details</h2>
-
-            <div className="mt-4 space-y-6 text-sm text-muted-foreground">
-              <div className="flex items-baseline justify-between gap-4">
-                <div>
-                  <strong className="text-2xl font-bold text-foreground">
-                    {price ? `$${price}` : "—"}
-                  </strong>
-                  <div className="text-xs text-muted-foreground/80 mt-1">
-                    {isBrand ? "Brand" : "Generic"}
-                  </div>
+            <div>
+              {/* Duplicate header info here so details column also contains the title/manufacturer */}
+              <div className="mb-4 text-left">
+                <h1 className="text-2xl font-bold">{name}</h1>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  {manufacturer || dosage}
                 </div>
+              </div>
 
-                <div className="text-sm text-muted-foreground">
-                  <div className="mb-1">
-                    <strong className="text-xs text-muted-foreground/90">
-                      Manufacturer
+              <h2 className="text-lg font-semibold">Details</h2>
+
+              <div className="mt-4 space-y-6 text-sm text-muted-foreground">
+                <div className="flex items-baseline justify-between gap-4">
+                  <div>
+                    <strong className="text-2xl font-bold text-foreground">
+                      {price ? `$${price}` : "—"}
                     </strong>
+                    <div className="text-xs text-muted-foreground/80 mt-1">
+                      {isBrand ? "Brand" : "Generic"}
+                    </div>
                   </div>
-                  <div className="text-sm text-foreground">
-                    {manufacturer ?? "—"}
+
+                  <div className="text-sm text-muted-foreground">
+                    <div className="mb-1">
+                      <strong className="text-xs text-muted-foreground/90">
+                        Manufacturer
+                      </strong>
+                    </div>
+                    <div className="text-sm text-foreground">
+                      {manufacturer ?? "—"}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <strong className="block text-xs text-muted-foreground/90">
-                  Dosage form
-                </strong>
-                <div className="mt-1">{dosage ?? "—"}</div>
-              </div>
-
-              <div>
-                <strong className="block text-xs text-muted-foreground/90">
-                  Description
-                </strong>
-                <div className="mt-1 text-sm text-foreground">
-                  {item.description ?? "—"}
-                </div>
-              </div>
-
-              {item.activeIngredients && item.activeIngredients.length > 0 && (
                 <div>
                   <strong className="block text-xs text-muted-foreground/90">
-                    Active ingredients
+                    Dosage form
                   </strong>
-                  <ul className="mt-2 space-y-1 list-disc pl-5">
-                    {item.activeIngredients.map(
-                      (ai: {
-                        id: string;
-                        name?: string;
-                        active_ingredient_name?: string;
-                        pivot?: { quantity?: number } | null;
-                        quantity?: number | null;
-                      }) => (
-                        <li key={ai.id}>
-                          {ai.name ?? ai.active_ingredient_name ?? "Unnamed"} —{" "}
-                          {ai.pivot?.quantity ?? ai.quantity ?? "—"}
-                        </li>
-                      )
-                    )}
-                  </ul>
+                  <div className="mt-1">{dosage ?? "—"}</div>
                 </div>
-              )}
+
+                <div>
+                  <strong className="block text-xs text-muted-foreground/90">
+                    Description
+                  </strong>
+                  <div className="mt-1 text-sm text-foreground">
+                    {item.description ?? "—"}
+                  </div>
+                </div>
+
+                {item.activeIngredients &&
+                  item.activeIngredients.length > 0 && (
+                    <div>
+                      <strong className="block text-xs text-muted-foreground/90">
+                        Active ingredients
+                      </strong>
+                      <ul className="mt-2 space-y-1 list-disc pl-5">
+                        {item.activeIngredients.map(
+                          (ai: {
+                            id: string;
+                            name?: string;
+                            active_ingredient_name?: string;
+                            pivot?: { quantity?: number } | null;
+                            quantity?: number | null;
+                          }) => (
+                            <li key={ai.id}>
+                              {ai.name ??
+                                ai.active_ingredient_name ??
+                                "Unnamed"}{" "}
+                              — {ai.pivot?.quantity ?? ai.quantity ?? "—"}
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </CustomBubbleBackground>
     );
   } catch (err) {
     const msg = (err as Error)?.message ?? "Unknown error";
     return (
-      <div className="p-8">
-        <h2 className="text-lg font-semibold">Error loading drug</h2>
-        <p className="mt-2 text-sm text-destructive">{msg}</p>
-      </div>
+      <CustomBubbleBackground className="min-h-screen py-4">
+        <Navbar showSearch={false} />
+        <div className="p-8">
+          <h2 className="text-lg font-semibold">Error loading drug</h2>
+          <p className="mt-2 text-sm text-destructive">{msg}</p>
+        </div>
+      </CustomBubbleBackground>
     );
   }
 }
